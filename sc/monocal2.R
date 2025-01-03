@@ -1,0 +1,192 @@
+rm(list=ls())
+setwd("./")
+setwd("D:\\monocal2")
+library(dplyr)
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+library(SingleR)
+library(ggplot2)
+###依赖R-4.3.3
+library(monocle)
+#BiocManager::install('monocle')
+#离线下载https://bioconductor.org/packages/3.17/data/experiment/src/contrib/HSMMSingleCell_1.20.0.tar.gz 
+#然后本地安装
+#BiocManager::install("HSMMSingleCell")
+
+#先下载qlcMatrix， https://cran.r-project.org/src/contrib/Archive/qlcMatrix/
+#BiocManager::install("docopt")
+#BiocManager::install('sparsesvd')
+#然后本地下载安装qlcMatrix
+
+#BiocManager::install("colorspace")
+#BiocManager::install('SingleR')
+#加载整合注释过后的数据
+input_file='DEsingledata.rds'#分析文件
+gene_list='gene_list.txt'    #基因列表
+gene_list2='gene_list2.txt'  #基因列表2
+qval_f=0.1    #差异基因qvalue的阈值
+qval_e=1e-5   #分支分析时的qvalue阈值
+follow_cluster=c(2,4,9,12) #感兴趣的细胞类群
+branch_point=1             #分支点
+
+data =readRDS(input_file)
+list1=readLines(gene_list)
+list2 = readLines(gene_list2)
+
+table(data@meta.data$celltype)
+table(data@meta.data$seurat_clusters)
+
+DimPlot(data, group.by="celltype", label=T, label.size=5)
+#选择2个感兴趣的clusters
+scRNA_2clusters=subset(data,ident=follow_cluster)
+
+DefaultAssay(scRNA_2clusters) <- "RNA"
+#先合并数据count，然后进行提取
+scRNA_2clusters <- JoinLayers(object = scRNA_2clusters, layers = "count")
+testdata1 <- GetAssayData(scRNA_2clusters,layer="count")
+#?new
+#提取meta.data
+pd <- new('AnnotatedDataFrame', data = scRNA_2clusters@meta.data)
+#分组信息
+fData <- data.frame(gene_short_name = row.names(testdata1), row.names = row.names(testdata1))
+fd <- new('AnnotatedDataFrame', data = fData)
+#创建专用的monocle的cds对象
+monocle_cds <- newCellDataSet(testdata1,
+                              phenoData = pd,
+                              featureData = fd,
+                              lowerDetectionLimit = 0.5,
+                              expressionFamily = negbinomial.size())
+
+
+#离散、归一化
+monocle_cds <- estimateSizeFactors(monocle_cds)
+monocle_cds <- estimateDispersions(monocle_cds)
+head(pData(monocle_cds))
+head(dispersionTable(monocle_cds))
+##数据质控
+#统计当前细胞的表达gene数量和当前基因表达的细胞数量；
+monocle_cds <- detectGenes(monocle_cds, min_expr = 0.1)
+#统计当前细胞的表达gene数量和当前基因表达的细胞数量；
+#运行结果是在featureData表格中添加num_cells_expressed列；
+#同时在phenoData表格中添加num_genes_expressed列；
+print(head(fData(monocle_cds)))
+
+#使用monocle选择的高变基因
+HSMM=monocle_cds
+disp_table <- dispersionTable(HSMM)
+disp.genes <- subset(disp_table, mean_expression >= 0.1 & dispersion_empirical >= 1 * dispersion_fit)$gene_id
+HSMM <- setOrderingFilter(HSMM, disp.genes)
+plot_ordering_genes(HSMM)
+
+#降维
+HSMM <- reduceDimension(HSMM, max_components = 2,method = 'DDRTree')
+#按照轨迹排序细胞
+HSMM <- orderCells(HSMM)
+p01=plot_cell_trajectory(HSMM, color_by = "seurat_clusters")
+#root_state更改发育起点
+#HSMM <- orderCells(HSMM,root_state = 2)
+
+p02=plot_cell_trajectory(HSMM, color_by = "State")
+#以0为发育起点
+p03=plot_cell_trajectory(HSMM, color_by = "Pseudotime")
+
+p04=plot_cell_trajectory(HSMM, color_by = "celltype")
+p05=plot_cell_trajectory(HSMM, color_by = "State") +
+  facet_wrap(~State, nrow = 3)
+ggsave("monocle_result_map/monocle_gene_pseclusters.pdf", p01, width=11 ,height=8,create.dir = TRUE)
+ggsave("monocle_result_map/monocle_gene_psestate.pdf", p02, width=11 ,height=8)
+ggsave("monocle_result_map/monocle_gene_psedotime.pdf", p03, width=11 ,height=8)
+ggsave("monocle_result_map/monocle_gene_psecelltype.pdf", p04, width=11 ,height=8)
+ggsave("monocle_result_map/monocle_gene_psestate_paging.pdf", p05, width=11 ,height=8)
+
+#########
+#找到与聚类相关的差异基因集，并绘制热图
+#获取基因列表
+list1 = as.character(list1)
+marker_genes <- row.names(subset(fData(HSMM),gene_short_name %in% list1))
+##
+#绘制关于筛选基因的图
+p1=plot_genes_in_pseudotime(HSMM[marker_genes,], color_by = "seurat_clusters")
+
+p2=plot_genes_in_pseudotime(HSMM[marker_genes,], color_by =  "State")
+
+p3=plot_genes_in_pseudotime(HSMM[marker_genes,], color_by =  "celltype")
+
+p11 <- plot_genes_jitter(HSMM[marker_genes,], grouping = "State", color_by = "State")
+p21 <- plot_genes_violin(HSMM[marker_genes,], grouping = "State", color_by = "State")
+p31 <- plot_genes_in_pseudotime(HSMM[marker_genes,], color_by = "State")
+plotc <- p11|p21|p31
+ggsave("result_map/maker_gene_pseclusters.pdf", p1, width=11 ,height=8,create.dir = TRUE)
+ggsave("result_map/maker_gene_psestate.pdf", p2, width=11 ,height=8)
+ggsave("result_map/maker_gene_psecelltype.pdf", p3, width=11 ,height=8)
+ggsave("result_map/maker_genes_map.pdf", plotc, width=11 ,height=8)
+##
+#对拟时间值来计算差异基因
+diff_gene_res <- differentialGeneTest(HSMM[marker_genes,],
+                                      fullModelFormulaStr = "~sm.ns(Pseudotime)")
+if (!dir.exists("result_data")) {
+  dir.create("result_data")
+}
+#保存一下
+write.table(diff_test_res, file = 'result_data/diff_gene_result.txt', sep = '\t', col.names = NA, quote = FALSE)
+sig_gene_names <- row.names(subset(diff_gene_res, qval < qval_f))
+
+
+ph3=plot_pseudotime_heatmap(HSMM[sig_gene_names,],
+                        num_clusters = 4,
+                        cores = 1,
+                        show_rownames = T,
+                        use_gene_short_name = T,
+                        return_heatmap = T)
+pdf("result_map/propose_time_diff.pdf",width = 5,height = 6)
+ph3
+dev.off()
+
+###轨迹的分支点分析
+#展示分支点
+plot_cell_trajectory(HSMM, color_by = "State")
+#选择分支点branch_point,很慢很慢
+BEAM_res <- BEAM(HSMM,branch_point = branch_point,cores = 4,progenitor_method = "duplicate")
+
+### 绘制与分支相关的热图
+BEAM_res <- BEAM_res[order(BEAM_res$qval),]
+BEAM_res1 <- BEAM_res[,c("gene_short_name", "pval", "qval")]
+#绘图并保存结果
+
+library(gridExtra)
+file_path="branched_result_map/branched_heatmap.pdf"
+if (!file.exists(dirname(file_path))) {
+  dir.create(dirname(file_path), recursive = TRUE)
+}
+pdf(file_path,width=11,height = 8)
+plot_genes_branched_heatmap(HSMM[row.names(subset(BEAM_res1,qval < qval_e)),],
+                            branch_point = 1,
+                            num_clusters = 4,
+                            cores = 1,
+                            use_gene_short_name = T,
+                            show_rownames = T
+                            #return_heatmap = T
+                            )
+dev.off()
+#输入感兴趣的基因列表
+list2=as.character(list2)
+
+genes <- row.names(subset(fData(HSMM),gene_short_name %in% list2))
+#绘制基因在分叉伪时间上的表达模式的图
+pdf("branched_result_map/branched_pseudotime.pdf",width=11,height = 8)
+p41=plot_genes_branched_pseudotime(HSMM[genes,],
+                               branch_point = 1,
+                               color_by = "State",
+                               ncol = 1)
+
+p42=plot_genes_branched_pseudotime(HSMM[genes,],
+                               branch_point = 1,
+                               color_by = "celltype",
+                               cell_size=2,
+                               ncol = 2)
+p = p41|p42
+p
+dev.off()
+saveRDS(HSMM,file='result_data/HSMM.rds')
+write.table(BEAM_res, file = 'result_data/BEAM_result.txt', sep = '\t', col.names = NA, quote = FALSE)

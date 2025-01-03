@@ -1,0 +1,148 @@
+rm(list = ls())
+getwd()
+setwd("D:/桌面/单细胞分析")
+##if (!requireNamespace("BiocManager", quietly = TRUE))
+##install.packages("BiocManager")
+library(SingleR)
+library(celldex)
+library(Seurat)
+library(pheatmap)
+library(Matrix)
+library(tidyverse)
+library(dplyr)
+library(patchwork)
+load("HumanPrimaryCellAtlas_hpca.se_human.RData")
+load("BlueprintEncode_bpe.se_human.RData")
+data_directory <- "D:/桌面/单细胞分析/data_human"
+data <- Read10X(data_directory)
+
+
+min_cell=3       #最小细胞数 保证基因 至少在多少个细胞中表达才会被保留
+min_feature=300 #最小基因数这个细胞至少表达多少个基因才能够被保留
+max_feature=7000 #最大基因数
+mt_precent=10 #线粒体含量百分比
+count_RNA=100000 #细胞数
+scale_fliter=10000 #放大倍数
+nfeatures=2000 #高变基因筛选阈值
+num_cliuster=1:13 #聚类范围
+resolution=0.5 #聚类分辨率
+
+
+scRNA <- CreateSeuratObject(counts = data, 
+                            project = "myproject", 
+                            min.cells = min_cell, 
+                            min.features = min_feature)
+table(scRNA@meta.data$orig.ident)
+scRNA[[]]
+scRNA[["percent.mt"]] <- PercentageFeatureSet(scRNA, pattern = "^MT-")#小鼠的^MT- 换成小写 ^mt
+scRNA1 <- subset(scRNA, subset = nFeature_RNA > min_feature & nFeature_RNA < max_feature & percent.mt < mt_precent & nCount_RNA < count_RNA)
+scRNA1  <- NormalizeData(scRNA1 , normalization.method = "LogNormalize", scale.factor = scale_fliter)
+scRNA1 <- FindVariableFeatures(scRNA1, selection.method = "vst", nfeatures = nfeatures)
+all.genes <- rownames(scRNA1)
+scRNA1 <- ScaleData(scRNA1, features = all.genes)
+cc.genes
+CaseMatch(c(cc.genes$s.genes,cc.genes$g2m.genes),VariableFeatures(scRNA1))
+rownames(scRNA1)
+scRNA1 <- RunPCA(scRNA1, features = VariableFeatures(scRNA1)) 
+plot1 <- DimPlot(scRNA1, reduction = "pca", group.by="orig.ident") 
+plot1
+plot2 <- ElbowPlot(scRNA1, ndims=20, reduction="pca") 
+scRNA2 <- JackStraw(scRNA1, num.replicate = 100)
+scRNA2 <- ScoreJackStraw(scRNA2, dims = 1:20)
+scRNA2<-JackStrawPlot(scRNA2, dims = 1:20)
+plotc <- plot1+plot2
+X <- c(plot2$data$dims)
+
+Y <- c(plot2$data$stdev)
+# 计算相邻点之间的斜率
+slopes <- diff(Y) / diff(X)
+slopes
+
+end_index <- length(Y)-1
+
+
+for (i in seq(end_index , 1,by=-1)) {
+  if (slopes[i] <= -0.15) {
+    end_index <- i+1
+    break
+  }else{
+    print(paste('斜率：',slopes[i],'索引：',i))
+  }
+}
+end_index
+
+turning_point_index <- end_index + 1
+
+# 对应的X值
+turning_point_X <- X[turning_point_index]
+
+cat("拐点的X值为:", turning_point_X, "\n")
+
+
+
+####
+
+##可以看出大概在PC为13的时候，每个轴是有区分意义的。
+num_cliuster=1:turning_point_X
+#聚类
+scRNA1 <- FindNeighbors(scRNA1, dims = num_cliuster) 
+
+###这个分辨率是可以自定义的，当我们的样本细胞数较大时候resolution 要高一些，一般情况2万细胞以上都是大于1.0的
+scRNA1 <- FindClusters(scRNA1, resolution = resolution)
+
+## 查看每一类有多少个细胞
+table(scRNA1@meta.data$seurat_clusters)
+scRNA1 = RunTSNE(scRNA1, dims = num_cliuster)#pc.num 看拐点图数值
+embed_tsne <- Embeddings(scRNA1, 'tsne')
+scRNA1 <- RunUMAP(scRNA1, dims = num_cliuster)
+embed_umap <- Embeddings(scRNA1, 'umap')
+#取出并保存clusters
+metadata <- scRNA1@meta.data
+cell_cluster <- data.frame(cell_ID=rownames(metadata), cluster_ID=metadata$seurat_clusters)
+t_sne_embeddings <- Embeddings(scRNA1, reduction = "tsne")
+##获取t-SNE降维结果
+t_sne_data <- as.data.frame(t_sne_embeddings)
+colnames(t_sne_data) <- c("tSNE1", "tSNE2")
+##获取UMAP降维结果
+umap_embeddings <- Embeddings(scRNA1, reduction = "umap")
+umap_data <- as.data.frame(umap_embeddings)
+colnames(umap_data) <- c("UMAP1", "UMAP2")
+##将合并后的数据框写入CSV文件
+combined_data <- cbind(cell_cluster, t_sne_data, umap_data)
+write.csv(cell_cluster,'D:/桌面/cell_cluster.csv',row.names = F)
+
+meta=scRNA1@meta.data #scRNA1的meta文件，包含了seurat的聚类结果
+head(scRNA1)
+plot1 <- DimPlot(scRNA1, reduction = "umap", label = TRUE)
+
+plot2<-DimPlot(scRNA1, reduction = "tsne",
+               label = TRUE)
+plot1 + plot2
+#进行singleR注释
+scRNA1_for_SingleR <- GetAssayData(scRNA1, slot="data") ##获取标准化矩阵
+scRNA1.hesc <- SingleR(test = scRNA1_for_SingleR, ref = hpca.se, labels = hpca.se$label.main) #
+scRNA1.hesc
+
+#seurat 和 singleR的table表
+table(scRNA1.hesc$labels,meta$seurat_clusters)
+#绘制umap和t-sne
+scRNA1@meta.data$labels <-scRNA1.hesc$labels
+print(DimPlot(scRNA1, group.by = c("seurat_clusters", "labels"),reduction = "umap"))
+#使用BP和HPCA两个数据库综合注释，使用list函数读入多个数据库
+scRNA13 <- scRNA1
+scRNA13.hesc <- SingleR(test = scRNA1_for_SingleR, ref = list(BP=bpe.se, HPCA=hpca.se), 
+                      labels = list(bpe.se$label.main, hpca.se$label.main)) 
+table(scRNA13.hesc$labels,meta$seurat_clusters)
+
+scRNA13@meta.data$labels <-scRNA13.hesc$labels
+
+print(DimPlot(scRNA13, group.by = c("seurat_clusters", "labels"),reduction = "umap"))
+##注释结果诊断#1基于scores within cells
+print(plotScoreHeatmap(scRNA1.hesc))
+#2基于 per-cell “deltas”诊断
+plotDeltaDistribution(scRNA1.hesc, ncol = 3)
+#与cluster结果比较
+tab <- table(label = scRNA1.hesc$labels,
+             cluster = meta$seurat_clusters)
+
+pheatmap(log10(tab + 10))
