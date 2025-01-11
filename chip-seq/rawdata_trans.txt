@@ -1,0 +1,27 @@
+#! /bin/bash
+#nohup cat SRR_Acc_List.txt | while read id; do prefetch $id; done > download.log 2>&1 &
+
+####数据转换 sra to fastq
+path="/home/renshida/chipseq"
+list_file="${path}/SRR_Acc_List.txt"  	# 列表文件路径
+sra_dir="${path}/sra/sra"             	# 输入的 .sra 文件所在路径
+fastq_dir="${path}/fastq"            	# 输出的 .fastq 文件存储路径
+
+mkdir -p "${fastq_dir}"        		# 创建 fastq 输出目录
+
+cat "${list_file}" | while read id; do
+  # 检查 .sra 文件是否存在
+  sra_file="${sra_dir}/${id}.sra"
+  if [ -f "${sra_file}" ]; then
+    echo "Processing ${id}..."
+    # 使用 fastq-dump 处理 .sra 文件，输出到 fastq 文件夹
+    fastq-dump --gzip -O "${fastq_dir}" "${sra_file}"
+    echo "Completed ${id}."
+  else
+    echo "File ${sra_file} not found, skipping..."
+  fi
+done
+
+###查看数据
+fastqc -t 6 -o ./ ./SRR*.fastq.gz
+multiqc  ./*.zip  -o ./ 		#整合质控文件

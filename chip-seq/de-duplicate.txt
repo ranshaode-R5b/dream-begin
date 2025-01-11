@@ -1,0 +1,15 @@
+#！ /bin/bash
+mkdir -p ${path}/rmdup
+
+path="/home/renshida/chipseq"
+
+nohup bash -c "
+cat SRR_Acc_List.txt | while read id;
+do
+  echo \"Processing \${id}...\"
+  samtools markdup -r \${path}/align/\${id}.bam \${path}/rmdup/\${id}_rmdup.bam
+  samtools flagstat \${path}/rmdup/\${id}_rmdup.bam > \${path}/rmdup/\${id}_rmdup_flagstat.txt
+done
+" > run_log.txt 2>&1 &
+
+#cat ./rmdup/SRR30273120_rmdup_flagstat.txt

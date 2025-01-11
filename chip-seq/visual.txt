@@ -1,0 +1,76 @@
+###首先确定基因组，如果需要研究其他物种的则需要自行下载
+#从File列表中load from File
+#载入bed文件
+#可以输入不同的基因，比如TP53进行查看
+#参考基因组：Human(GRCh38/hg38) 表示这些数据是基于人类基因组参考序列GRCh38/hg38版本的。染色体位置：列出了染色体17号（chr17）上的不同区域，如p13.2、p13.1、p12、p11.2、p11.1等，这些是染色体的特定区域。基因名称：TP53 是一个著名的基因，与癌症相关，这里列出了它在染色体17号上的位置。基因组坐标：chr17:7,666,421-7,689,490 是基因TP53在染色体17号上的精确位置，以碱基对（base pairs）为单位。基因组大小：7,668 kb、7,670 kb、7,672 kb 等表示的是基因组的大致大小，单位是千碱基对（kilobase）。p300 intersect peak：p300 intersect peak 14438 可能表示p300蛋白与DNA结合的峰值区域，编号为14438。
+
+#deeptools可视化
+path="/home/renshida/chipseq"
+mkdir deeptools
+
+# 统计reads在全基因组范围的情况
+# 双端测序
+#multiBamSummary bins -bs 1000 --bamfiles ${path}/intersect/*_sort.bam --extendReads 130 -out treat_results.npz
+# 单端测序
+nohup multiBamSummary bins -bs 1000 --bamfiles ${path}/intersect/*_sort.bam -out ./deeptools/treat_results.npz > multibam.log &
+
+# 相关性散点图
+plotCorrelation -in ./deeptools/treat_results.npz -o ./deeptools/treat_results.pdf --corMethod spearman -p scatterplot
+
+# 热图
+plotCorrelation -in ./deeptools/treat_results.npz -o ./deeptools/treat_results_heatmap.pdf --corMethod spearman -p heatmap
+
+# 主成分分析
+plotPCA -in ./deeptools/treat_results.npz  -o ./deeptools/pca.pdf
+
+
+
+########peak分布可视化      打开UCSC点击Table browser
+#下载不同物种所有基因的转录起始位点(TSS)区域的bed文件
+
+
+
+mkdir TSS
+
+####用于生成一个矩阵文件，该文件包含了以转录起始位点（TSS）为中心的 p300 蛋白结合信号的分布情况   
+
+path="/home/renshida/chipseq"
+
+## 处理单一样本
+## both -R and -S can accept multiple files
+
+computeMatrix reference-point --referencePoint TSS -p 15 \
+-b 10000 -a 10000 \
+-R ${path}/TSS/hg38_TSS.bed \
+-S ${path}/bamCoverage/p300.bw \
+--skipZeros -o ./TSS/p300_TSS.gz \
+--outFileSortedRegions ./TSS/p300_genes.bed
+
+## both plotHeatmap and plotProfile will use the output from computeMatrix
+plotHeatmap -m ${path}/TSS/p300_TSS.gz -out ${path}/TSS/test.png
+plotHeatmap -m ${path}/TSS/p300_TSS.gz -out ${path}/TSS/test.pdf --plotFileFormat pdf --dpi 720
+plotProfile -m ${path}/TSS/p300_TSS.gz -out ${path}/TSS/test.png
+plotProfile -m ${path}/TSS/p300_TSS.gz -out ${path}/TSS/test.pdf --plotFileFormat pdf --perGroup --dpi 720
+####computeMatrix
+#--referencePoint TSS: 指定参考点为转录起始位点。
+#-p 15: 线程
+#-b 10000: 指定参考点上游的区域长度为 10000 个碱基对。
+#-a 10000: 指定参考点下游的区域长度为 10000 个碱基对。
+#-R : 指定包含转录起始位点的 BED 文件。
+#-S : 指定包含 p300 蛋白结合信号的 bigWig 文件。
+#--skipZeros: 跳过信号值为零的区域。
+#-o : 指定输出矩阵文件的名称。
+
+####plotProfile 命令
+#--outFileSortedRegions : 指定输出排序后的区域列表文件的名称。
+#-m p300_TSS.gz: 指定输入的矩阵文件。
+#-out test.png: 指定输出的轮廓图文件名，格式为 PNG。
+#--plotFileFormat pdf: 指定输出文件的格式为 PDF。
+#--perGroup: 为每个组（如每个基因或每个样本）生成单独的轮廓图。
+#--dpi 720: 指定输出图像的分辨率为 720 DPI。
+
+#####plotHeatmap 命令
+#-m p300_TSS.gz: 指定输入的矩阵文件。
+#-out test.png: 指定输出的热图文件名，格式为 PNG。
+#--plotFileFormat pdf: 指定输出文件的格式为 PDF。
+#--dpi 720: 指定输出图像的分辨率为 720 DPI。
