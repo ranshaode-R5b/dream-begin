@@ -15,7 +15,7 @@ gunzip Homo_sapiens.GRCh38.dna.toplevel.fa.gz
     --genes=./people.gtf
  
  cellranger count --id=sample345 \  
-                   --transcriptome=/home/sunda/sunda/lizimu/ref_genomic/people_genome/ \ 
-                   --fastqs=/home/sunda/sunda/lizimu/rawdata/raw \ 
+                   --transcriptome=/home/renshida/ref_genomic/people_genome/ \ 
+                   --fastqs=/home/renshida/rawdata/raw \ 
                    --sample Chromium_3p_GEX_Human_PBMC  \    
 
