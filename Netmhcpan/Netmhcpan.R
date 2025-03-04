@@ -1,10 +1,10 @@
 ### fasta-HLA pseudosequence-format
     #mhci info come from netmhcpan4.1 training data; mhcii info come from netmhciipan4.3 training data
     load(paste0(path_test,"TEST.Rdata"))
-    hlamhci01<-"/data1/wuguojia/data/mhc_benchmark/database/HLAallele_sequence/MHC_pseudo.dat"
-    hlamhci02<-"/data1/wuguojia/data/mhc_benchmark/database/HLAallele_sequence/MHC_pseudo.dat"
-    hlamhcii01<-"/data1/wuguojia/data/mhc_benchmark/database/HLAallele_sequence/pseudosequence.2023.dat"
-    hlamhcii02<-"/data1/wuguojia/data/mhc_benchmark/database/HLAallele_sequence/pseudosequence.2016.all.X.dat"
+    hlamhci01<-"/data1/renshida/data/mhc_benchmark/database/HLAallele_sequence/MHC_pseudo.dat"
+    hlamhci02<-"/data1/renshida/data/mhc_benchmark/database/HLAallele_sequence/MHC_pseudo.dat"
+    hlamhcii01<-"/data1/renshida/data/mhc_benchmark/database/HLAallele_sequence/pseudosequence.2023.dat"
+    hlamhcii02<-"/data1/renshida/data/mhc_benchmark/database/HLAallele_sequence/pseudosequence.2016.all.X.dat"
     seq1<-rbind(read.table(hlamhci01, header = FALSE, sep = "", stringsAsFactors = FALSE),read.table(hlamhci02, header = FALSE, sep = "", stringsAsFactors = FALSE))
     seq2<-rbind(read.table(hlamhcii01, header = FALSE, sep = "", stringsAsFactors = FALSE),read.table(hlamhcii02, header = FALSE, sep = "", stringsAsFactors = FALSE))
     #mhci match sequences
@@ -45,7 +45,7 @@
             }
         }
     }
-    files <- list.files("/data1/wuguojia/data/mhc_benchmark/testbase/HLA_fasta", recursive = TRUE, full.names = TRUE,pattern = "\\.fasta$")
+    files <- list.files("/data1/renshida/data/mhc_benchmark/testbase/HLA_fasta", recursive = TRUE, full.names = TRUE,pattern = "\\.fasta$")
     archive_mhci <- files[!grepl("HLA-D",files)]
     archive_mhcii <- files[grepl("HLA-D",files)]
     write.table(archive_mhci,file=paste0(path_HLA_fasta,"archive_mhci.txt"),col.names = F,row.names = F,quote = F)
