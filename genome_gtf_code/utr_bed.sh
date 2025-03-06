@@ -41,3 +41,4 @@ awk -F '\t' '$6 == "+" {print $1,$2,$9, "5'\''UTR",$5,$6}' OFS='\t' start_trans.
 awk -F '\t' '$6 == "-" {print $1,$8,$3, "5'\''UTR",$5,$6}' OFS='\t' start_trans.bed > fu.bed
 cat zheng.bed fu.bed | sort -k1,1 -k2,2n > 5pUTR.bed
 rm zheng.bed fu.bed
+
