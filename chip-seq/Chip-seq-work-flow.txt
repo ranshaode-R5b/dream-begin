@@ -1,0 +1,509 @@
+# ChIp-Seq（染色质免疫共沉淀测序）数据分析--学习 
+
+```shell
+mkdir -p 1.qc 2.multiqc 
+1.FastqQC
+nohup fastqc *.gz -o 1.qc &
+#安装multiqc
+pip install multiqc -i  https://pypi.tuna.tsinghua.edu.cn/simple
+nohup multiqc 1.qc/* -o 2.multiqc &
+#安装Trimmomatic
+wget https://github.com/usadellab/Trimmomatic/files/5854859/Trimmomatic-0.39.zip
+unzip Trimmomatic-0.39.zip
+
+java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar -h
+
+java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 input_forward.fq.gz input_reverse.fq.gz output_forward_paired.fq.gz output_forward_unpaired.fq.gz output_reverse_paired.fq.gz output_reverse_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56
+
+HEADCROP:从 reads 的开头切掉指定数量的碱基，即从fastqc中看的（本次9）
+ILLUMINACLIP：去除接头（ILLUMINACLIP:TruSeq3-PE.fa:2:30:10）
+LEADING: 从 reads 的开头切除质量值低于阈值的碱基（低于质量 3）（LEADING:3）
+TRAILING: 从 reads 的末尾开始切除质量值低于阈值的碱基（TRAILING:3）
+SLIDINGWINDOW: 从 reads 的 5' 端开始，进行滑窗质量过滤，切掉碱基质量平均值低于阈值的滑窗，使用宽度为 4 碱基的滑动窗口扫描读取，当每碱基的平均质量低于 15 时进行剪切（SLIDINGWINDOW:4:15）
+MINLEN: 如果经过剪切后 reads 的长度低于阈值则丢弃这条 reads，即上面的计算方法：（150-9）×40%≈56 （本次没有使用）或者测序片段的长度：MINLEN 应该与测序片段的长度相关。例如，如果片段的原始长度是 150 bp，那么设置 MINLEN 为一个较低值（例如 50-100 bp）可以帮助去除过短的片段，但保留足够长的高质量读段。下游分析的需求：短的片段可能在比对时不准确，或影响后续的定量分析。因此，如果下游分析要求较长的片段，如比对或组装基因组时，建议选择相对较高的 MINLEN。例如，如果某些分析工具要求最小片段长度为 36 bp 或 50 bp，您应该确保 MINLEN 设置满足该要求。
+
+#2.去接头，双端输入两个，输出四个（包含两个未配对的，但是结果只要配对上的）
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_H4_input_R2.fastq.gz HDT102_H4_input_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_H4_input_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_AP_input_R2.fastq.gz HDT102_AP_input_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_AP_input_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_AP_input_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_AP_input_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_AP_input_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_2_H4_R2.fastq.gz HDT102_2_H4_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_2_H4_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_2_H4_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_2_H4_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_2_H4_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_2_AP_R2.fastq.gz HDT102_2_AP_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_2_AP_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_2_AP_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_2_AP_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_2_AP_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_1_H4_R2.fastq.gz HDT102_1_H4_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_1_H4_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_1_H4_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_1_H4_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_1_H4_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 B73_H4_input_R2.fastq.gz B73_H4_input_R1.fastq.gz   ./Trimmomatic_res/output_B73_H4_input_R2_paired.fq.gz    ./Trimmomatic_res/output_B73_H4_input_R2_unpaired.fq.gz   ./Trimmomatic_res/output_B73_H4_input_R1_paired.fq.gz   ./Trimmomatic_res/output_B73_H4_input_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 B73_2_H4_R2.fastq.gz B73_2_H4_R1.fastq.gz   ./Trimmomatic_res/output_B73_2_H4_R2_paired.fq.gz    ./Trimmomatic_res/output_B73_2_H4_R2_unpaired.fq.gz   ./Trimmomatic_res/output_B73_2_H4_R1_paired.fq.gz   ./Trimmomatic_res/output_B73_2_H4_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 B73_1_H4_R2.fastq.gz B73_1_H4_R1.fastq.gz   ./Trimmomatic_res/output_B73_1_H4_R2_paired.fq.gz    ./Trimmomatic_res/output_B73_1_H4_R2_unpaired.fq.gz   ./Trimmomatic_res/output_B73_1_H4_R1_paired.fq.gz   ./Trimmomatic_res/output_B73_1_H4_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
+
+#Clean Data （不需要质控，去接头）
+#3.Botie2比对
+##建立索引
+bowtie2-build Zm-B73-REFERENCE-NAM-5.0.fa Zm-B73-5.0 --threads 4
+mkdir -p 4.align 5.filter 6.dedup
+#安装qualimap  http://qualimap.conesalab.org/
+chmod +x qualimap
+java_options="-Xms32m -Xmx$JAVA_MEM_SIZE -XX:MaxPermSize=1024m"  替换为
+java_options="-Xms32m -Xmx$JAVA_MEM_SIZE"
+/home/renshida/renshida/biosoftools/qualimap2/qualimap
+#比对，转bam,排序
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_AP_input_R1_val_1.fq.gz -2 B73_AP_input_R2_val_2.fq.gz  -S   ../4.align/B73_AP_input.sam &
+nohup samtools sort B73_AP_input.sam -O bam -@ 80 -o B73_AP_input.bam &
+nohup samtools flagstat B73_AP_input.bam > B73_AP_input.flagstat.txt &
+nohup samtools view -q 1 -c B73_AP_input.bam > B73_AP_input_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_AP_input.bam -outdir ./qualimap_res_B73_AP_input &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_2_AP_R1_val_1.fq.gz -2 B73_2_AP_R2_val_2.fq.gz  -S   ../4.align/B73_2_AP.sam &
+nohup samtools sort B73_2_AP.sam -O bam -@ 80 -o B73_2_AP.bam &
+nohup samtools flagstat B73_2_AP.bam > B73_2_AP.flagstat.txt &
+nohup samtools view -q 1 -c B73_2_AP.bam > B73_2_AP_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_2_AP.bam -outdir ./qualimap_res_B73_2_AP &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_1_AP_R1_val_1.fq.gz -2 B73_1_AP_R2_val_2.fq.gz  -S   ../4.align/B73_1_AP.sam &
+nohup samtools sort B73_1_AP.sam -O bam -@ 80 -o B73_1_AP.bam &
+nohup samtools flagstat B73_1_AP.bam > B73_1_AP.flagstat.txt &
+nohup samtools view -q 1 -c B73_1_AP.bam > B73_1_AP_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_1_AP.bam -outdir ./qualimap_res_B73_1_AP &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_1_H4_R1_val_1.fq.gz -2 B73_1_H4_R2_val_2.fq.gz  -S   ../4.align/B73_1_H4.sam &
+nohup samtools sort B73_1_H4.sam -O bam -@ 80 -o B73_1_H4.bam &
+nohup samtools flagstat B73_1_H4.bam > B73_1_H4.flagstat.txt &
+nohup samtools view -q 1 -c B73_1_H4.bam > B73_1_H4_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_1_H4.bam -outdir ./qualimap_res_B73_1_H4 &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_2_H4_R1_val_1.fq.gz -2 B73_2_H4_R2_val_2.fq.gz -S ../4.align/B73_2_H4.sam &
+nohup samtools sort B73_2_H4.sam -O bam -@ 80 -o B73_2_H4.bam &
+nohup samtools flagstat B73_2_H4.bam > B73_2_H4.flagstat.txt &
+nohup samtools view -q 1 -c B73_2_H4.bam > B73_2_H4_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_2_H4.bam -outdir ./qualimap_res_B73_2_H4 &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 B73_H4_input_R1_val_1.fq.gz -2 B73_H4_input_R2_val_2.fq.gz -S ../4.align/B73_H4_input.sam &
+nohup samtools sort B73_H4_input.sam -O bam -@ 80 -o B73_H4_input.bam &
+nohup samtools flagstat B73_H4_input.bam > B73_H4_input.flagstat.txt &
+nohup samtools view -q 1 -c B73_H4_input.bam > B73_H4_input_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam B73_H4_input.bam -outdir ./qualimap_res_B73_H4_input &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_1_H4_R1_val_1.fq.gz -2 HDT102_1_H4_R2_val_2.fq.gz -S ../4.align/HDT102_1_H4.sam &
+nohup samtools sort HDT102_1_H4.sam -O bam -@ 80 -o HDT102_1_H4.bam &
+nohup samtools flagstat HDT102_1_H4.bam > HDT102_1_H4.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_1_H4.bam > HDT102_1_H4_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_1_H4.bam -outdir ./qualimap_res_HDT102_1_H4 &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_2_AP_R1_val_1.fq.gz -2 HDT102_2_AP_R2_val_2.fq.gz -S ../4.align/HDT102_2_AP.sam &
+nohup samtools sort HDT102_2_AP.sam -O bam -@ 80 -o HDT102_2_AP.bam &
+nohup samtools flagstat HDT102_2_AP.bam > HDT102_2_AP.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_2_AP.bam > HDT102_2_AP_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_2_AP.bam -outdir ./qualimap_res_HDT102_2_AP &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_2_H4_R1_val_1.fq.gz -2 HDT102_2_H4_R2_val_2.fq.gz -S ../4.align/HDT102_2_H4.sam &
+nohup samtools sort HDT102_2_H4.sam -O bam -@ 80 -o HDT102_2_H4.bam &
+nohup samtools flagstat HDT102_2_H4.bam > HDT102_2_H4.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_2_H4.bam > HDT102_2_H4_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_2_H4.bam -outdir ./qualimap_res_HDT102_2_H4 &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_AP_input_R1_val_1.fq.gz -2 HDT102_AP_input_R2_val_2.fq.gz -S ../4.align/HDT102_AP_input.sam &
+nohup samtools sort HDT102_AP_input.sam -O bam -@ 80 -o HDT102_AP_input.bam &
+nohup samtools flagstat HDT102_AP_input.bam > HDT102_AP_input.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_AP_input.bam > HDT102_AP_input_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_AP_input.bam -outdir ./qualimap_res_HDT102_AP_input &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_H4_input_R1_val_1.fq.gz -2 HDT102_H4_input_R2_val_2.fq.gz -S ../4.align/HDT102_H4_input.sam &
+nohup samtools sort HDT102_H4_input.sam -O bam -@ 80 -o HDT102_H4_input.bam &
+nohup samtools flagstat HDT102_H4_input.bam > HDT102_H4_input.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_H4_input.bam > HDT102_H4_input_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_H4_input.bam -outdir ./qualimap_res_HDT102_H4_input &
+
+nohup bowtie2 -p 80 -x /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-5.0 -1 HDT102_1_AP_R1_val_1.fq.gz -2 HDT102_1_AP_R2_val_2.fq.gz -S ../4.align/HDT102_1_AP.sam &
+nohup samtools sort HDT102_1_AP.sam -O bam -@ 80 -o HDT102_1_AP.bam &
+nohup samtools flagstat HDT102_1_AP.bam > HDT102_1_AP.flagstat.txt &
+nohup samtools view -q 1 -c HDT102_1_AP.bam > HDT102_1_AP_read_depth.txt &
+nohup /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam HDT102_1_AP.bam -outdir ./qualimap_res_HDT102_1_AP &
+
+#4.去除重复reads
+
+for fq_f in {HDT102_H4_input,HDT102_AP_input,HDT102_2_H4,HDT102_1_H4,HDT102_2_AP,HDT102_1_AP,B73_H4_input,B73_AP_input,B73_2_H4,B73_1_H4,B73_2_AP,B73_1_AP}
+do
+
+input_bam="4.align/${fq_f}.bam"
+java -jar /home/renshida/renshida/biosoftools/GenomeAnalysisTK/gatk-4.4.0.0/gatk-package-4.4.0.0-local.jar MarkDuplicates \
+I=$input_bam \
+O=6.dedup/${fq_f}_dedup.bam \
+M=6.dedup/${fq_f}_dedup_metrics.txt \
+REMOVE_DUPLICATES=true \
+READ_NAME_REGEX=null
+/home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam 6.dedup/${fq_f}_dedup.bam -outdir 6.dedup/
+samtools flagstat 6.dedup/{fq_f}_dedup.bam > 6.dedup/{fq_f}_dedup_flagstat.txt
+samtools index 6.dedup/${fq_f}_dedup.bam
+done
+
+#5.生成bw文件
+
+mkdir -p 7.bamCover
+
+for i in 6.dedup/*.bam;do f=$(echo $i | sed 's/6\.dedup\/\(.*\)\_dedup\.bam/\1/');bamCoverage -b $(pwd)/$i -o $(pwd)/7.bamCover/${f}.bw -bs 1 -p 15 --normalizeUsing RPKM;done
+
+#6.Peak Calling
+
+#寻找ChIP-seq的转录因子（TF）的命令：（生成的文件是narrowPeak）
+
+macs3 callpeak -t ChIP.bam(处理) -c Control.bam（对照） -f BAM -g hs -n test -B -q 0.01
+
+nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_2_H4 -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_1_H4 -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g hs -n HDT102_2_AP -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g hs -n HDT102_1_AP -B -p 0.01 &
+nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g hs -n B73_2_H4 -B -p 0.01 &
+nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g hs -n B73_1_H4 -B -p 0.01 &
+nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g hs -n B73_2_AP -B -p 0.01 &
+nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g hs -n B73_1_AP -B -p 0.01 &
+
+#寻找ChIP-seq的组蛋白（Histone ）Mark的命令：（生成的文件是broadPeak）
+
+macs3 callpeak -t ChIP.bam -c Control.bam --broad -g hs --broad-cutoff 0.1 -n test
+
+nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_2_H4 &
+nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_1_H4 &
+nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_2_AP &
+nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_1_AP &
+nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_2_H4 &
+nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_1_H4 &
+nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_2_AP &
+nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_1_AP &
+
+#.bedgraph to bw（重新生成bw,双端测序归一化后）
+
+#归一化 被除掉的数来自peak表格里的 # tags after filtering in treatment: 12117878
+
+B73_1_AP_peaks.xls
+total tags in treatment: 16490849
+tags after filtering in treatment: 16358527
+total tags in control: 16623518
+tags after filtering in control: 16476026
+
+B73_1_H4_peaks.xls
+total tags in treatment: 22182759
+tags after filtering in treatment: 21972951
+total tags in control: 17123521
+tags after filtering in control: 16974704
+
+B73_2_AP_peaks.xls
+total tags in treatment: 18510252
+tags after filtering in treatment: 18341433
+total tags in control: 16623518
+tags after filtering in control: 16476026
+
+B73_2_H4_peaks.xls
+total tags in treatment: 19522944
+tags after filtering in treatment: 19357835
+total tags in control: 17123521
+tags after filtering in control: 16974704
+
+HDT102_1_AP_peaks.xls
+total tags in treatment: 24297340
+tags after filtering in treatment: 24010536
+total tags in control: 18089974
+tags after filtering in control: 17933648
+
+HDT102_1_H4_peaks.xls
+total tags in treatment: 20645092
+tags after filtering in treatment: 20452886
+total tags in control: 28832043
+tags after filtering in control: 28428531
+
+HDT102_2_AP_peaks.xls
+total tags in treatment: 20173169
+tags after filtering in treatment: 19972130
+total tags in control: 18089974
+tags after filtering in control: 17933648
+
+HDT102_2_H4_peaks.xls
+total tags in treatment: 20901454
+tags after filtering in treatment: 20702360
+total tags in control: 28832043
+tags after filtering in control: 28428531
+#归一化
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/16.3}' B73_1_AP_treat_pileup.bdg > B73_1_AP_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/21.9}' B73_1_H4_treat_pileup.bdg > B73_1_H4_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/18.3}' B73_2_AP_treat_pileup.bdg > B73_2_AP_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/19.3}' B73_2_H4_treat_pileup.bdg > B73_2_H4_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/20.4}' HDT102_1_H4_treat_pileup.bdg > HDT102_1_H4_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/20.7}' HDT102_2_H4_treat_pileup.bdg > HDT102_2_H4_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/24.0}' HDT102_1_AP_treat_pileup.bdg > HDT102_1_AP_treat_gyh.bdg &
+nohup awk '{if ($4 == 0) print $1, $2, $3, 0; else print $1, $2, $3, $4/19.9}' HDT102_2_AP_treat_pileup.bdg > HDT102_2_AP_treat_gyh.bdg &
+
+#归一化后的bedgraph转bw
+
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig B73_1_AP_treat_gyh.bdg maize.chrom.sizes B73_1_AP_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig B73_1_H4_treat_gyh.bdg maize.chrom.sizes B73_1_H4_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig B73_2_AP_treat_gyh.bdg maize.chrom.sizes B73_2_AP_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig B73_2_H4_treat_gyh.bdg maize.chrom.sizes B73_2_H4_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig HDT102_1_H4_treat_gyh.bdg maize.chrom.sizes HDT102_1_H4_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig HDT102_2_H4_treat_gyh.bdg maize.chrom.sizes HDT102_2_H4_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig HDT102_1_AP_treat_gyh.bdg maize.chrom.sizes HDT102_1_AP_shift.bw &
+nohup /home/renshida/renshida/tools/bedGraphToBigWig/bedGraphToBigWig HDT102_2_AP_treat_gyh.bdg maize.chrom.sizes HDT102_2_AP_shift.bw &
+
+#deeptools
+
+nohup computeMatrix reference-point -p 20 --referencePoint TSS -b 3000 -a 3000 -R yumi5.0.gtf -S  ./B73_1_H4_shift.bw ./B73_2_H4_shift.bw ./B73_1_AP_shift.bw ./B73_2_AP_shift.bw ./HDT102_1_H4_shift.bw ./HDT102_2_H4_shift.bw ./HDT102_1_AP_shift.bw ./HDT102_2_AP_shift.bw --skipZeros  -out ./all_TSSzhaifengshift.computeMatrix.gz --outFileSortedRegions ./all_TSSzhaifengshiftDEEPTOOLS.bed &
+
+nohup plotHeatmap -m all_TSSzhaifengshift.computeMatrix.gz -o all_TSSzhaifengshiftheatmap_TSS2.pdf --zMin 0 --zMax 3 --colorMap coolwarm --missingDataColor 1 &
+
+nohup plotHeatmap -m all_TSSzhaifengshift.computeMatrix.gz -o 0_0.05.pdf --zMin 0 --zMax 0.05 --colorMap coolwarm --missingDataColor 1 &
+
+#MOTIF
+
+nohup findMotifsGenome.pl ./B73_1_AP_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_B73_1_AP &
+
+nohup findMotifsGenome.pl ./B73_2_AP_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_B73_2_AP &
+
+nohup findMotifsGenome.pl ./B73_2_H4_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_B73_2_H4 &
+
+nohup findMotifsGenome.pl ./B73_1_H4_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_B73_1_H4 &
+
+nohup findMotifsGenome.pl ./HDT102_1_AP_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_HDT102_1_AP &
+
+nohup findMotifsGenome.pl ./HDT102_2_AP_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_HDT102_2_AP &
+
+nohup findMotifsGenome.pl ./HDT102_2_H4_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_HDT102_2_H4 &
+
+nohup findMotifsGenome.pl ./HDT102_1_H4_summits.bed    /home/renshida/renshida/chip-seq_from_renshida/reference/Zm-B73-REFERENCE-NAM-5.0.fa  ./MotifOutput_HDT102_1_H4 &
+
+
+
+```
+
+```R
+
+#diffbind 
+差异peak分析diffbind  差异结合分析
+sudo R
+library("profileplyr")
+library("DiffBind")
+library("edgeR")
+library("ChIPseeker")
+library(DESeq2)
+
+
+#（只做H4和AP)
+AP
+tamoxifenAP <- dba(sampleSheet="tamoxifenAP.csv")
+tamoxifenAP<- dba.count(tamoxifenAP)
+pdf("DiffBind_PlotsAP.pdf")
+dba.plotPCA(tamoxifenAP,  attributes=DBA_FACTOR, label=DBA_ID)
+plot(tamoxifenAP)
+dev.off()
+tamoxifenAP<- dba.contrast(tamoxifenAP, categories=DBA_CONDITION,minMembers = 2)
+tamoxifenAP <- dba.analyze(tamoxifenAP)
+compAP.deseq <- dba.report(tamoxifenAP, method=DBA_DESEQ2, contrast = 1, th=1)
+out <- as.data.frame(compAP.deseq)
+write.table(out, file="./deseq2AP.txt", sep="\t", quote=F, col.names = NA)
+deseq2AP.bed <- out[ which(out$FDR < 0.05), 
+                 c("seqnames", "start", "end", "strand", "Fold")]
+write.table(deseq2AP.bed, file="./xianzhuchayi_deseq2AP_sig.bed", sep="\t", quote=F, row.names=F, col.names=F)
+diff_bind_sites_df_AP <- as.data.frame(deseq2AP.bed)
+write.csv(diff_bind_sites_df_AP, file="diff_bind_sites_AP.csv", row.names=FALSE)
+pdf("DiffBind_AP_Plots.pdf")
+# 绘制Venn图
+dba.plotVenn(tamoxifenAP, contrast=1, bDB=TRUE, bGain=TRUE, bLoss=TRUE, bAll=FALSE)
+# 绘制PCA图
+dba.plotPCA(tamoxifenAP, attributes=DBA_TISSUE, label=DBA_CONDITION)
+# 绘制MA图
+dba.plotMA(tamoxifenAP)
+# 绘制火山图
+dba.plotVolcano(tamoxifenAP)
+# 绘制箱线图
+pvals <- dba.plotBox(tamoxifenAP)
+# 绘制热图
+hmap <- colorRampPalette(c("red", "black", "green"))(n = 8)
+readscores <- dba.plotHeatmap(tamoxifenAP, contrast=1, correlations=FALSE, scale="row", colScheme = hmap)
+# 绘制轮廓图和轮廓热图
+profiles <- dba.plotProfile(tamoxifenAP)
+dba.plotProfile(profiles)
+dev.off()
+
+H4
+tamoxifenH4 <- dba(sampleSheet="tamoxifenH4.csv")
+tamoxifenH4<- dba.count(tamoxifenH4)
+pdf("DiffBind_PlotsH4.pdf")
+dba.plotPCA(tamoxifenH4,  attributes=DBA_FACTOR, label=DBA_ID)
+plot(tamoxifenH4)
+dev.off()
+tamoxifenH4<- dba.contrast(tamoxifenH4, categories=DBA_CONDITION,minMembers = 2)
+tamoxifenH4 <- dba.analyze(tamoxifenH4, method=DBA_ALL_METHODS)
+
+compH4.deseq <- dba.report(tamoxifenH4, method=DBA_DESEQ2, contrast = 1, th=1)
+out <- as.data.frame(compH4.deseq)
+write.table(out, file="./deseq2H4.txt", sep="\t", quote=F, col.names = NA)
+deseq2H4.bed <- out[ which(out$FDR < 0.05), 
+                 c("seqnames", "start", "end", "strand", "Fold")]
+write.table(deseq2H4.bed, file="./xianzhuchayi_deseq2H4_sig.bed", sep="\t", quote=F, row.names=F, col.names=F)
+diff_bind_sites_df_H4 <- as.data.frame(deseq2H4.bed)
+write.csv(diff_bind_sites_df_H4, file="diff_bind_sites_H4.csv", row.names=FALSE)
+pdf("DiffBind_H4_Plots.pdf")
+# 绘制Venn图
+dba.plotVenn(tamoxifenH4, contrast=1, bDB=TRUE, bGain=TRUE, bLoss=TRUE, bAll=FALSE)
+# 绘制PCA图
+dba.plotPCA(tamoxifenH4, attributes=DBA_TISSUE, label=DBA_CONDITION)
+# 绘制MA图
+dba.plotMA(tamoxifenH4)
+# 绘制火山图
+dba.plotVolcano(tamoxifenH4)
+# 绘制箱线图
+pvals <- dba.plotBox(tamoxifenH4)
+# 绘制热图
+hmap <- colorRampPalette(c("red", "black", "green"))(n = 8)
+readscores <- dba.plotHeatmap(tamoxifenH4, contrast=1, correlations=FALSE, scale="row", colScheme = hmap)
+# 绘制轮廓图和轮廓热图
+profiles <- dba.plotProfile(tamoxifenH4)
+dba.plotProfile(profiles)
+dev.off()
+
+
+######由于diffbind差异的结果太少，不能进行富集分析，所以直接用callpeak的结果富集，合并bed文件进行分析
+#H4  AP
+```
+
+```R
+##ChIPseeker 
+#callpeak的narrowpeak,bed 和 diffbind的差异结果都没有注释出gene_id,这一步的作用是把id注释出来，便于功能和通路的富集
+rm(list = ls()) # 删除工作空间中所有的对象
+setwd('D:桌面/ChIp-Seq') 
+#BiocManager::install("ChIPseeker")
+library(dplyr)
+library(stringr)
+library(AnnotationForge)
+library(clusterProfiler)
+library(ChIPseeker)
+library(rtracklayer)
+library(ggplot2)
+#读取峰值文件
+peakFile <- "deseq2AP.csv"
+peaks <- readPeakFile(peakFile, sep = ",", header = TRUE)
+#准备注释文件
+gtf_file <- "output.gtf"
+txdb <- import(gtf_file)
+#进行注释分析
+annotateResult <- annotatePeak(peaks, txdb,tssRegion=c(-1000, 1000))
+#查看注释结果
+summary(annotateResult)
+#可视化注释结果
+plotDistToTSS(annotateResult)
+#保存注释结果
+save(annotateResult, file = "annotateResult.RData")
+# 或者导出为表格
+write.csv(as.data.frame(annotateResult), file = "annotateResultAP.csv")
+
+```
+
+```R
+##富集分析
+library(readxl)
+library(Biostrings)
+library(tidyverse)
+library(ChIPseeker)
+library(openxlsx)#读取.xlsx文件
+library(ggplot2)#柱状图和点状图
+library(stringr)#基因ID转换
+library(enrichplot)#GO,KEGG,GSEA
+library(clusterProfiler)#GO,KEGG,GSEA
+library(GOplot)#弦图，弦表图，系统聚类图
+library(DOSE)
+library(ggnewscale)
+library(topGO)#绘制通路网络图
+library(circlize)#绘制富集分析圈图
+library(ComplexHeatmap)
+
+setwd("D:\\桌面\\ChIp-Seq")
+sx <- read.csv('./H4_GO_SX.csv')
+eggno<-read_delim(file="./Zea_mays.tsv",
+                    col_names=T,delim="\t",comment="##")
+
+#KEGG
+#annotation
+emapper<- eggno %>%
+  dplyr::select(
+    GID = `#query`,
+    GO = GOs,
+    KO = KEGG_ko,
+    Pathway = KEGG_Pathway
+  )
+
+# 获取KEGG 这里就要借助Y叔的clusterProfiler，爬去最新的kegg的结果
+get_path2name <- function(){
+  keggpathid2name.df <- clusterProfiler:::kegg_list(db = "pathway")
+  keggpathid2name.df <- keggpathid2name.df %>%
+    purrr::set_names("path_id","path_name") %>%
+    dplyr::mutate(path_id = str_replace(path_id, pattern="map", replacement = "ko")) # %>%
+  return(keggpathid2name.df)
+}
+pathway2name <- get_path2name()
+
+pathway2gene <- dplyr::select(emapper, Pathway, GID) %>%
+  separate_rows(Pathway, sep = ",", convert = F) %>%
+  filter(str_detect(Pathway, "ko")) 
+##这里注意分析的时候用转录本的id,因为通常一个基因对应好几个转录本，如果用基因id可能会富集不到，或者我们在基因id后加上后缀_P001，这样默认每个基因的第一个转录本。
+down_KEGG<-enricher(sx$transcriptId,
+                    TERM2GENE = pathway2gene,
+                    TERM2NAME = pathway2name,
+                    pvalueCutoff = 1,
+                    qvalueCutoff = 1)
+write.csv(down_KEGG,'./KEGG.csv')
+
+
+#######go
+install.packages('org.Yyumisd.eg.db',repos = NULL, type="source")
+library(org.Yyumisd.eg.db)
+
+GO_database <- org.Yyumisd.eg.db
+GO <- enrichGO(gene = sx$geneID,
+               OrgDb = GO_database,
+               keyType = 'GID',
+               ont = 'ALL',
+               pvalueCutoff = 1,
+               qvalueCutoff = 1,
+               minGSSize = 1,#最小基因集
+               maxGSSize = 500)
+write.csv(GO,'./H4_GO.csv')
+
+
+##########GO画图
+#筛选之后再去作图
+go.data <- read.csv('./H4_GO_SX.csv')
+go.data <- go.data %>% filter(ONTOLOGY == "BP")
+picname <- 'BP_MF.tiff'
+source('./画GO气泡图.R')
+
+
+#####kegg画图
+rm(list = ls())
+up_list <- read.csv('./KEGG.csv')
+
+df <- up_list[1:30,]
+df$Description <- as.character(df$Description)
+# 将 Description 列转换为因子，并按照 Count 列的顺序重新排序
+df$Description <- factor(df$Description, levels = df$Description[order(df$Count)])
+
+# 创建颜色向量
+custom_colors <- c(rep("#f4772e", 6), rep("#f48989", 6), rep("#987CBA", 6), rep("#50b753", 6), rep("#519ca0",6))
+# 创建柱形图并指定填充颜色和外框线
+p1 <- ggplot(df, aes(x = Count, y = Description, fill = Description)) +
+  geom_bar(stat = "identity", show.legend = FALSE, width = 0.7, color = "black") +  # 调整柱子宽度并添加外框线
+  scale_fill_manual(values = custom_colors) +
+  theme(panel.grid.major = element_blank(),  # 去掉主要网格线
+        panel.grid.minor = element_blank(),  # 去掉次要网格线
+        panel.background = element_rect(fill = "white"),  # 设置背景颜色为白色
+        #panel.border = element_rect(color = "black", fill = NA, size = 1),  # 添加外框线
+        axis.line = element_line(color = "black"))  # 添加坐标轴线
+
+# 显示柱形图
+print(p1)
+
+ggsave(p1, filename = './H4_kegg.jpg', width = 9, height = 6, dpi = 300)
+
+
+
+```
+
