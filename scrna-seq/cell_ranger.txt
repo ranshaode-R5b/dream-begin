@@ -1,0 +1,20 @@
+#制作参考基因组所需
+#解压 
+gunzip Homo_sapiens.GRCh38.111.gtf.gz
+gunzip Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+
+# （人）
+ cellranger mkgtf \
+     Homo_sapiens.GRCh38.111.gtf \
+     people.gtf \
+     --attribute=gene_biotype:protein_coding 
+ 
+ cellranger mkref \
+    --genome=people_genome \
+    --fasta=./Homo_sapiens.GRCh38.dna.toplevel.fa \
+    --genes=./people.gtf
+ 
+ cellranger count --id=sample345 \  
+                   --transcriptome=/home/renshida/ref_genomic/people_genome/ \ 
+                   --fastqs=/home/renshida/rawdata/raw \ 
+                   --sample Chromium_3p_GEX_Human_PBMC  \    
