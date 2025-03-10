@@ -23,6 +23,7 @@ Read10X:barcodes.tsv, features.tsv, matrix.mtx
 5.基因归一化
 	对所有的基因scale...去除细胞周期影响    #非必须
 XXX.如多批次数据，则需去除批次效应，harmony
+	Harmony导入PCA的降维数据后，会采用soft k-means clustering算法将细胞聚类
 6.降维聚类
 	
 7.细胞聚类
