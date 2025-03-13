@@ -16,3 +16,12 @@ bamCoverage将bam文件转化为反映基因组区域reads覆盖度结果的bw�
 
 
 computeMatrix 是ChIP-seq数据分析中的一个重要工具，用于整合、处理和可视化ChIP-seq数据。生成信号矩阵。数据集整合。可视化准备。
+
+
+
+
+
+
+NAME_peaks.xls：包含peak信息的tab分割的文件，前几行会显示callpeak时的命令。输出信息包含：染色体号、peak起始位点、peak结束位点、peak区域长度、peak的峰值位点(summit position)、peak 峰值的高度(pileup height at peak summit, -log10(pvalue) for the peak summit)、peak的富集倍数(相对于random Poisson distribution with local lambda)。<XLS里的坐标和bed格式的坐标还不一样，起始坐标需要减1才与narrowPeak的起始坐标一样>
+NAME_peaks.narrowPeak：1：染色体号；2：peak起始位点；3：结束位点；4：peak name；5：int(-10*log10qvalue)；6：正负链；7：fold change；8：-log10pvalue；9：-log10qvalue；10：relative summit position to peak start
+NAME_treat_pileup.bdg 和 NAME_control_lambda.bdg：这些是 bedGraph 格式的文件，分别表示处理组和对照组的信号强度。可用于进一步的信号可视化或转换为其他格式（如 bigWig）
