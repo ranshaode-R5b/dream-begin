@@ -131,6 +131,7 @@ ggsave("./images/pics/plot_average_expression.jpg", plot = plot,
 
 all.genes <- rownames(scRNA1)
 scRNA1 <- ScaleData(scRNA1, features = all.genes)
+#查看周期基因与高变基因的交集
 cc.genes
 CaseMatch(c(cc.genes$s.genes,cc.genes$g2m.genes),VariableFeatures(scRNA1))
 
