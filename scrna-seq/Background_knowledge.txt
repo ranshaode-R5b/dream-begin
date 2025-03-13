@@ -22,8 +22,9 @@ Read10X:barcodes.tsv, features.tsv, matrix.mtx
 	一些基因在细胞中表达的浮动比较大，这些往往是我们后续分群的时候需要关注的
 5.基因归一化
 	对所有的基因scale...去除细胞周期影响    #非必须
-XXX.如多批次数据，则需去除批次效应，harmony
-	Harmony导入PCA的降维数据后，会采用soft k-means clustering算法将细胞聚类
+XXX.如多批次数据，则需去除批次效应，harmony、cca
+	harmony：低维空间的坐标值，Harmony导入PCA的降维数据后，会采用soft k-means clustering算法将细胞聚类
+	cca：降维后，考虑空间距离的相关性，寻找不同数据集的“锚点”
 6.降维聚类
 	
 7.细胞聚类
