@@ -36,21 +36,21 @@ protein_coding_str=$(IFS=' '; echo "${protein_coding[*]}")
  awk -v arr="$protein_coding_str" '
   BEGIN {
        n = split(arr, a, " ");
-                for (i = 1; i <= n; i++) if (a[i] != "") b[a[i]] = 1;
-			         }
-				 $3 == "transcript" {
-				     for (i = 1; i <= NF; i++) {
-					                     if ($i ~ /transcript_type/) {
-								                     split($(i+1), transcript_type_arr, /"/);
-										                     if (transcript_type_arr[2] in b) {
-													                     transcript_type = transcript_type_arr[2];
-															                     count[transcript_type]++;
-																	                                    }
-																					                            }
-																								                    }
-																										            }
-																											            END {
-																												            for (type in count) {
-																														            print type, count[type];
-																															            }
-																															    }' /home/renshida/jieduan1/data/gencode.v19.annotation.gtf_withproteinids
+            for (i = 1; i <= n; i++) if (a[i] != "") b[a[i]] = 1;
+	    }
+$3 == "transcript" {
+       for (i = 1; i <= NF; i++) {
+	           if ($i ~ /transcript_type/) {
+		   split($(i+1), transcript_type_arr, /"/);
+		   if (transcript_type_arr[2] in b) {
+		   transcript_type = transcript_type_arr[2];
+		   count[transcript_type]++;
+					}
+				}
+			}
+		}
+		END {
+		for (type in count) {
+		print type, count[type];																													            
+		}
+  }' /home/renshida/jieduan1/data/gencode.v19.annotation.gtf_withproteinids
