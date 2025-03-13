@@ -370,7 +370,7 @@ dev.off()
 ##ChIPseeker 
 #callpeak的narrowpeak,bed 和 diffbind的差异结果都没有注释出gene_id,这一步的作用是把id注释出来，便于功能和通路的富集
 rm(list = ls()) # 删除工作空间中所有的对象
-setwd('D:桌面/ChIp-Seq') 
+setwd('home/renshida/renshida/ChIp-Seq') 
 #BiocManager::install("ChIPseeker")
 library(dplyr)
 library(stringr)
@@ -416,7 +416,7 @@ library(topGO)#绘制通路网络图
 library(circlize)#绘制富集分析圈图
 library(ComplexHeatmap)
 
-setwd("D:\\桌面\\ChIp-Seq")
+setwd("home/renshida/renshida/ChIp-Seq")
 sx <- read.csv('./H4_GO_SX.csv')
 eggno<-read_delim(file="./Zea_mays.tsv",
                     col_names=T,delim="\t",comment="##")
