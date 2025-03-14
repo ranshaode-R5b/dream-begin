@@ -156,7 +156,8 @@ CaseMatch(c(cc.genes$s.genes,cc.genes$g2m.genes),VariableFeatures(scRNA1))
 rownames(scRNA1)
 #PCA降维并提取主成分
 #PCA降维
-scRNA1 <- RunPCA(scRNA1, features = VariableFeatures(scRNA1)) 
+scRNA1 <- RunPCA(scRNA1, features = VariableFeatures(scRNA1))
+#可视化PCA方法，有seurat提供，VizDimReduction，DimPlot和DimHeatmap
 plot1 <- DimPlot(scRNA1, reduction = "pca", group.by="orig.ident") 
 ###画图
 #plot1 
