@@ -163,9 +163,9 @@ plot1 <- DimPlot(scRNA1, reduction = "pca", group.by="orig.ident")
 #plot1 
 ###ElbowPlot() 可以快速的检查降维的效果
 plot2 <- ElbowPlot(scRNA1, ndims=20, reduction="pca") 
-scRNA2 <- JackStraw(scRNA1, num.replicate = 100)
-scRNA2 <- ScoreJackStraw(scRNA2, dims = 1:20)
-scRNA2<-JackStrawPlot(scRNA2, dims = 1:20)
+#scRNA2 <- JackStraw(scRNA1, num.replicate = 100)
+#scRNA2 <- ScoreJackStraw(scRNA2, dims = 1:20)
+#scRNA2 <- JackStrawPlot(scRNA2, dims = 1:20)
 ##画图,根据图选择下一步的参数
 #plot2
 ###一般选择拐点作为降维的度数。
