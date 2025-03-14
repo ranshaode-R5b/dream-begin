@@ -288,7 +288,7 @@ min_value <- min(cluster_numeric)
 
 
 
-
+#对于每个群，提取其对应的前10个基因，并绘制小提琴图、t-SNE和UMAP特征图，以及点图。
 for (i in min_value:max_value){
   selected_value <- top10[top10$cluster == i, "gene"]
   selected_value <- as.character(selected_value$gene)
