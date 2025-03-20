@@ -289,7 +289,9 @@ library(DESeq2)
 
 #（只做H4和AP)
 AP
+#读入文件一旦读入了peaksets，合并函数就找到所有重叠的peaks，并导出一致性的peaksets。
 tamoxifenAP <- dba(sampleSheet="tamoxifenAP.csv")
+#亲和结合矩阵，计算每个peaks/regions的count信息。先对一致性的peaks数据集进行标准化，然后根据他们的峰值（point of greatest read overlap）再次中心化并修剪一些peaks，最终得到更加标准的peak间隔。
 tamoxifenAP<- dba.count(tamoxifenAP)
 pdf("DiffBind_PlotsAP.pdf")
 dba.plotPCA(tamoxifenAP,  attributes=DBA_FACTOR, label=DBA_ID)
