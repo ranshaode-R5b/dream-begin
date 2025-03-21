@@ -1,6 +1,5 @@
 setwd("/home/renshida/eqtm/rawdata/human")
 getwd()
-
 #install.packages("dplyr")
 #install.packages("readxl")
 #install.packages("readr")
@@ -24,7 +23,9 @@ library(readr)
 library(readxl)
 library(dplyr)
 
-##########33092652
+
+
+#######33092652
 file_path <- "33092652-cis-trans.xlsx"
 sheets <- excel_sheets(file_path)
 data_list <- lapply(sheets, function(sheet) {
@@ -124,11 +125,7 @@ combined_data1 <- combined_data1[,a]
 write.table(combined_data1, file = "/home/renshida/eqtm/data/human/33092652-cis-trans-kora.txt", sep = "\t", row.names = FALSE)
 range(combined_data1$FDR)
 
-
-
-
-
-###########################37271320
+################37271320
 rawdata <- read_excel("37271320-cis.xlsx")
 rawdata <- rawdata[, c(1, 2, 6, 4, 5)]
 colnames(rawdata)[1] <- "CpG"
@@ -234,7 +231,7 @@ range(rawdata$pvalue)
 
 
 
-###########
+###########35426765
 data_E7 <- read_excel("35426765-cis.xlsx", sheet = "Table E7", col_names = FALSE)
 colnames(data_E7) <- data_E7[2, ]
 data_E7 <- data_E7[-1, ]
@@ -262,7 +259,7 @@ write.table(data_E7, file = "/home/renshida/eqtm/data/human/35426765-cis.txt", s
 
 
 
-#######
+#######31403346
 data1 <- read.csv("31403346-cis.csv", header = TRUE, sep = ",")
 data1 <- data1[,-1]
 colnames(data1)[1] <- "CpG"
@@ -290,7 +287,7 @@ write.table(data1, file = "/home/renshida/eqtm/data/human/31403346-cis.txt", sep
 
 
 
-######
+######32493484
 data2 <- read_excel("32493484-cis.xlsx",sheet = "Sheet2")
 colnames(data2)[1] <- "CpG"
 colnames(data2)[2] <- "Gene"
@@ -355,14 +352,12 @@ print(pvalue_range)
 
 
 
-
-
 #######
 data4 <- read_excel("31282290-cis-mir.xlsx",col_names = FALSE)
 data4 <- data4[-1,]
 colnames(data4) <- data4[1,]
 data4 <- data4[-1,]
-data4 <- data4[,c(1,2,3,6,7)]
+data4 <- data4[,c(1,11,3,6,7)]
 colnames(data4)[1] <- "CpG"
 colnames(data4)[2] <- "Gene"
 colnames(data4)[3] <- "Beta"
@@ -397,10 +392,10 @@ data5 <- data5[,c(1,9,4,6,10)]
 colnames(data5)[1] <- "DMR"
 colnames(data5)[3] <- "Gene"
 colnames(data5)[4] <- "Beta"
-colnames(data5)[5] <- "FDR"
+colnames(data5)[5] <- "P-value"
 data5$Species <- "Human"
 data5$SE <- NA
-data5$'P-value' <- NA
+data5$FDR <- NA
 data5$Tissue <- "Whole blood"
 data5$Disease <- "Fetal alcohol spectrum disorder"
 data5$Article <- "Expression Quantitative Trait Methylation Analysis Identifies Whole Blood Molecular Footprint in Fetal Alcohol Spectrum Disorder (FASD)"
@@ -410,16 +405,12 @@ data5$PMID <- "37047575"
 data5$Cis_Trans_eqtm <- "Cis"
 data5$Method <- "Pearson’s correlation coefficient"
 data5$Sample <- "63"
-a <- c(1:4,10,5:9,11:ncol(data5))
+a <- c(1:3,15,4:14,16,17)
 data5 <- data5[,a]
-a <- c(1:4,8,5:7,9:ncol(data5))
+a <- c(1:5,8,6:7,9:ncol(data5))
 data5 <- data5[,a]
-a <- c(1:3,15,4:14,16:ncol(data5))
+a <- c(1:7,9,8,10:17)
 data5 <- data5[,a]
-a <- c(1:6,8,7,9:17)
-data5 <- data5[,a]
-colnames(data5)[7] <- "P-value"
-colnames(data5)[8] <- "FDR"
 write.table(data5, file = "/home/renshida/eqtm/data/human/37047575-cis-DMR.txt", sep = "\t", row.names = FALSE)
 
 
@@ -489,33 +480,33 @@ range(data7$`P-value`)
 
 
 
-data8 <- read_excel("39009577-cis.xlsx")
-data8 <- data8[,c(2,17,8,20,1,22)]
-data8 <- data8 %>%
-  separate(`Beta (SE)`, into = c("Beta1", "Beta2", "Beta3", "Beta4"), sep = ";\\s*", convert = TRUE)
-data8 <- data8 %>%
-  separate(Beta1, into = c("Beta1_value", "Beta1_SE"), sep = "\\(", convert = TRUE) %>%
-  separate(Beta2, into = c("Beta2_value", "Beta2_SE"), sep = "\\(", convert = TRUE) %>%
-  separate(Beta3, into = c("Beta3_value", "Beta3_SE"), sep = "\\(", convert = TRUE) %>%
-  separate(Beta4, into = c("Beta4_value", "Beta4_SE"), sep = "\\(", convert = TRUE)
-data8 <- data8 %>%
-  mutate(across(everything(), ~ gsub("\\)", "", .)))
-colnames(data8)[1] <- "CpG"
-colnames(data8)[2] <- "Gene"
-colnames(data8)[3] <- "Cis_Trans_eqtm"
-data8RS <- data8[,c(1,2,3,4,5,12,13)]
-colnames(data8RS)[4] <- "Beta"
-colnames(data8RS)[5] <- "SE"
-colnames(data8RS)[6] <- "P-value"
-data8RS$Species <- "Human"
-data8RS$Tissue <- "whole blood"
-data8RS$Disease <- "Depression"
-data8RS$Article <- "Decoding depression: a comprehensive multi-cohort exploration of blood DNA methylation using machine learning and deep learning approaches"
-data8RS$Journal <- "Translational Psychiatry"
-data8RS$Date <- "2024.07"
-data8RS$PMID <- "39009577"
-data8RS$Method <- "Linear mixed model"
-data8RS$Sample <- "1202"
+# data8 <- read_excel("39009577-cis.xlsx")
+# data8 <- data8[,c(2,17,8,20,1,22)]
+# data8 <- data8 %>%
+#   separate(`Beta (SE)`, into = c("Beta1", "Beta2", "Beta3", "Beta4"), sep = ";\\s*", convert = TRUE)
+# data8 <- data8 %>%
+#   separate(Beta1, into = c("Beta1_value", "Beta1_SE"), sep = "\\(", convert = TRUE) %>%
+#   separate(Beta2, into = c("Beta2_value", "Beta2_SE"), sep = "\\(", convert = TRUE) %>%
+#   separate(Beta3, into = c("Beta3_value", "Beta3_SE"), sep = "\\(", convert = TRUE) %>%
+#   separate(Beta4, into = c("Beta4_value", "Beta4_SE"), sep = "\\(", convert = TRUE)
+# data8 <- data8 %>%
+#   mutate(across(everything(), ~ gsub("\\)", "", .)))
+# colnames(data8)[1] <- "CpG"
+# colnames(data8)[2] <- "Gene"
+# colnames(data8)[3] <- "Cis_Trans_eqtm"
+# data8RS <- data8[,c(1,2,3,4,5,12,13)]
+# colnames(data8RS)[4] <- "Beta"
+# colnames(data8RS)[5] <- "SE"
+# colnames(data8RS)[6] <- "P-value"
+# data8RS$Species <- "Human"
+# data8RS$Tissue <- "whole blood"
+# data8RS$Disease <- "Depression"
+# data8RS$Article <- "Decoding depression: a comprehensive multi-cohort exploration of blood DNA methylation using machine learning and deep learning approaches"
+# data8RS$Journal <- "Translational Psychiatry"
+# data8RS$Date <- "2024.07"
+# data8RS$PMID <- "39009577"
+# data8RS$Method <- "Linear mixed model"
+# data8RS$Sample <- "1202"
 
 
 
@@ -583,51 +574,51 @@ write.table(data9e, file = "/home/renshida/eqtm/data/human/37233989-cis-ve.txt",
 
 
 ########
-data10 <- read_tsv("/home/renshida/eqtm/rawdata/human/35302492-cis-adj.txt")
-head(data10)
-colnames(data10)[1] <- "CpG"
-colnames(data10)[2] <- "Gene"
-colnames(data10)[3] <- "Beta"
-colnames(data10)[4] <- "SE"
-colnames(data10)[5] <- "P-value"
-data10 <- data10[,c(1,2,3,4,5)]
-data10$Species <- "Human"
-data10$Tissue <- "Whole blood"
-data10$Disease <- "Autosomal"
-data10$Article <- "Identification of autosomal cis expression quantitative trait methylation (cis eQTMs) in children's blood"
-data10$Journal <- "Elife"
-data10$Date <- "2022.03"
-data10$PMID <- "35302492"
-data10$Cis_Trans_eqtm <- "Cis"
-data10$Method <- "Linear regression model"
-data10$Sample <- "832"
-data10$FDR <- NA
-data10$'P-value' <- as.numeric(data10$'P-value')
-pvalue_range <- range(data10$'P-value', na.rm = TRUE)
-print(pvalue_range)
-a <- c(1:2,13,3:12,14:16)
-data10 <- data10[,a]
-a <- c(1:6,16,7:15)
-data10 <- data10[,a]
-xxx <- read_tsv("/home/renshida/eqtm/rawdata/human/35302492-cis-adj.txt")
-data10$Genesymbol <- xxx$TC_gene
-xxx <- NULL
-write.table(data10, file = "/home/renshida/eqtm/data/human/35302492-cis-adj.txt", sep = "\t", row.names = FALSE)
-write.table(data10[,c(2,17)], file = "/home/renshida/eqtm/data/trans_g_id/35302492-cis-adj.txt", sep = "\t", row.names = FALSE)
-has_na <- any(is.na(data10$TC_gene))
-na_count <- sum(is.na(data10$TC_gene))
-print(has_na)
-print(na_count)
+# data10 <- read_tsv("/home/renshida/eqtm/rawdata/human/35302492-cis-adj.txt")
+# head(data10)
+# colnames(data10)[1] <- "CpG"
+# colnames(data10)[2] <- "Gene"
+# colnames(data10)[3] <- "Beta"
+# colnames(data10)[4] <- "SE"
+# colnames(data10)[5] <- "P-value"
+# data10 <- data10[,c(1,2,3,4,5)]
+# data10$Species <- "Human"
+# data10$Tissue <- "Whole blood"
+# data10$Disease <- "Autosomal"
+# data10$Article <- "Identification of autosomal cis expression quantitative trait methylation (cis eQTMs) in children's blood"
+# data10$Journal <- "Elife"
+# data10$Date <- "2022.03"
+# data10$PMID <- "35302492"
+# data10$Cis_Trans_eqtm <- "Cis"
+# data10$Method <- "Linear regression model"
+# data10$Sample <- "832"
+# data10$FDR <- NA
+# data10$'P-value' <- as.numeric(data10$'P-value')
+# pvalue_range <- range(data10$'P-value', na.rm = TRUE)
+# print(pvalue_range)
+# a <- c(1:2,13,3:12,14:16)
+# data10 <- data10[,a]
+# a <- c(1:6,16,7:15)
+# data10 <- data10[,a]
+# xxx <- read_tsv("/home/renshida/eqtm/rawdata/human/35302492-cis-adj.txt")
+# data10$Genesymbol <- xxx$TC_gene
+# xxx <- NULL
+# write.table(data10, file = "/home/renshida/eqtm/data/human/35302492-cis-adj.txt", sep = "\t", row.names = FALSE)
+# write.table(data10[,c(2,17)], file = "/home/renshida/eqtm/data/trans_g_id/35302492-cis-adj.txt", sep = "\t", row.names = FALSE)
+# has_na <- any(is.na(data10$TC_gene))
+# na_count <- sum(is.na(data10$TC_gene))
+# print(has_na)
+# print(na_count)
 
 
 
 data11 <- read_tsv("35302492-cis-unadj.txt")
 colnames(data11)[1] <- "CpG"
-colnames(data11)[2] <- "Gene"
 colnames(data11)[3] <- "Beta"
 colnames(data11)[4] <- "SE"
 colnames(data11)[5] <- "P-value"
-data11 <- data11[,c(1,2,3,4,5)]
+data11 <- data11[,c(1,15,3,4,5)]
+colnames(data11)[2] <- "Gene"
 data11$Species <- "Human"
 data11$Tissue <- "Whole blood"
 data11$Disease <- "Autosomal"
@@ -644,13 +635,10 @@ a <- c(1:2,13,3:12,14:16)
 data11 <- data11[,a]
 a <- c(1:6,16,7:15)
 data11 <- data11[,a]
-xxx <- read_tsv("/home/renshida/eqtm/rawdata/human/35302492-cis-unadj.txt")
-data11$Genesymbol <- xxx$TC_gene
-xxx <- NULL
-write.table(data11[,c(2,17)], file = "/home/renshida/eqtm/data/trans_g_id/35302492-cis-unadj.txt", sep = "\t", row.names = FALSE)
+data11 <- data11[!is.na(data11$Gene), ]
 write.table(data11, file = "/home/renshida/eqtm/data/human/35302492-cis-unadj.txt", sep = "\t", row.names = FALSE)
-has_na <- any(is.na(data11$TC_gene))
-na_count <- sum(is.na(data11$TC_gene))
+has_na <- any(is.na(data11$Gene))
+na_count <- sum(is.na(data11$Gene))
 print(has_na)
 print(na_count)
 
@@ -710,6 +698,7 @@ data13$`P-value` <- as.numeric(data13$`P-value`)
 data13$FDR <- as.numeric(data13$FDR)
 range(data13$`P-value`)
 range(data13$FDR)
+##转cpg.r
 write.table(data13, file = "/home/renshida/eqtm/data/human/38438351-cis.txt", sep = "\t", row.names = FALSE)
 
 
@@ -866,56 +855,56 @@ unique_mapping <- mapping[!duplicated(mapping$ENSEMBL), ]
 
 
 ############
-data17 <- read_excel("35176128-cis.xlsx")
-colnames(data17) <- data17[1,]
-data17 <- data17[-1,]
-data17p <- data17[,c(2,1,3)]
-colnames(data17p)[1] <- "CpG"
-colnames(data17p)[2] <- "Gene"
-colnames(data17p)[3] <- "Beta"
-data17p <- data17p %>%
-  filter(rowSums(across(everything(), ~ . == "NA")) == 0)
-data17p$Cis_Trans_eqtm <- "Cis"
-data17p$SE <- NA
-data17p$'P-value' <- NA
-data17p$FDR <- NA
-data17p$Species <- "Human"
-data17p$Tissue <- "Skin cutaneous melanoma"
-data17p$Disease <- "Skin cutaneous melanoma"
-data17p$Article <- "Tumor expression quantitative trait methylation screening reveals distinct CpG panels for deconvolving cancer immune signatures"
-data17p$Journal <- "Cancer Research"
-data17p$Date <- "2022.05"
-data17p$PMID <- "35176128"
-data17p$Method <- "Spearman correlation coefficient"
-data17p$Sample <- "471"
-a <- c(1:2,4,3,5:16)
-data17p <- data17p[,a]
+# data17 <- read_excel("35176128-cis.xlsx")
+# colnames(data17) <- data17[1,]
+# data17 <- data17[-1,]
+# data17p <- data17[,c(2,1,3)]
+# colnames(data17p)[1] <- "CpG"
+# colnames(data17p)[2] <- "Gene"
+# colnames(data17p)[3] <- "Beta"
+# data17p <- data17p %>%
+#   filter(rowSums(across(everything(), ~ . == "NA")) == 0)
+# data17p$Cis_Trans_eqtm <- "Cis"
+# data17p$SE <- NA
+# data17p$'P-value' <- NA
+# data17p$FDR <- NA
+# data17p$Species <- "Human"
+# data17p$Tissue <- "Skin cutaneous melanoma"
+# data17p$Disease <- "Skin cutaneous melanoma"
+# data17p$Article <- "Tumor expression quantitative trait methylation screening reveals distinct CpG panels for deconvolving cancer immune signatures"
+# data17p$Journal <- "Cancer Research"
+# data17p$Date <- "2022.05"
+# data17p$PMID <- "35176128"
+# data17p$Method <- "Spearman correlation coefficient"
+# data17p$Sample <- "471"
+# a <- c(1:2,4,3,5:16)
+# data17p <- data17p[,a]
 
 
 
-data17n <- data17[,c(5,1,6)]
-colnames(data17n)[1] <- "CpG"
-colnames(data17n)[2] <- "Gene"
-colnames(data17n)[3] <- "Beta"
-data17n <- data17n %>%
-  filter(rowSums(across(everything(), ~ . == "NA")) == 0)
-data17n$Cis_Trans_eqtm <- "Cis"
-data17n$SE <- NA
-data17n$'P-value' <- NA
-data17n$FDR <- NA
-data17n$Species <- "Human"
-data17n$Tissue <- "Skin cutaneous melanoma"
-data17n$Disease <- "Skin cutaneous melanoma"
-data17n$Article <- "Tumor expression quantitative trait methylation screening reveals distinct CpG panels for deconvolving cancer immune signatures"
-data17n$Journal <- "Cancer Research"
-data17n$Date <- "2022.05"
-data17n$PMID <- "35176128"
-data17n$Method <- "Spearman correlation coefficient"
-data17n$Sample <- "471"
-a <- c(1:2,4,3,5:16)
-data17n <- data17n[,a]
-data17a <- rbind(data17n, data17p)
-write.table(data17a, file = "/home/renshida/eqtm/data/human/35176128-cis.txt", sep = "\t", row.names = FALSE)
+# data17n <- data17[,c(5,1,6)]
+# colnames(data17n)[1] <- "CpG"
+# colnames(data17n)[2] <- "Gene"
+# colnames(data17n)[3] <- "Beta"
+# data17n <- data17n %>%
+#   filter(rowSums(across(everything(), ~ . == "NA")) == 0)
+# data17n$Cis_Trans_eqtm <- "Cis"
+# data17n$SE <- NA
+# data17n$'P-value' <- NA
+# data17n$FDR <- NA
+# data17n$Species <- "Human"
+# data17n$Tissue <- "Skin cutaneous melanoma"
+# data17n$Disease <- "Skin cutaneous melanoma"
+# data17n$Article <- "Tumor expression quantitative trait methylation screening reveals distinct CpG panels for deconvolving cancer immune signatures"
+# data17n$Journal <- "Cancer Research"
+# data17n$Date <- "2022.05"
+# data17n$PMID <- "35176128"
+# data17n$Method <- "Spearman correlation coefficient"
+# data17n$Sample <- "471"
+# a <- c(1:2,4,3,5:16)
+# data17n <- data17n[,a]
+# data17a <- rbind(data17n, data17p)
+# write.table(data17a, file = "/home/renshida/eqtm/data/human/35176128-cis.txt", sep = "\t", row.names = FALSE)
 
 
 
@@ -923,7 +912,7 @@ write.table(data17a, file = "/home/renshida/eqtm/data/human/35176128-cis.txt", s
 data18 <- read_excel("30390659-cis.xlsx")
 colnames(data18) <- data18[1,]
 data18 <- data18[-1,]
-data18 <- data18[,c(1,10,2,3,4,5)]
+data18 <- data18[,c(1,11,2,3,4,5)]
 colnames(data18)[1] <- "CpG"
 colnames(data18)[2] <- "Gene"
 colnames(data18)[3] <- "Beta"
@@ -942,12 +931,13 @@ data18$Method <- "Linear regression model"
 data18$Sample <- 36
 a <- c(1:2,14,3:13,15:16)
 data18 <- data18[,a]
-xxx <- read_excel("30390659-cis.xlsx")
-colnames(xxx) <- xxx[1,]
-xxx <- xxx[-1,]
-data18$Genesymbol <- xxx$Genename
-xxx <- NULL
-write.table(data18[,c(2,17)], file = "/home/renshida/eqtm/data/trans_g_id/30390659-cis.txt", sep = "\t", row.names = FALSE)
+data18 <- data18[!is.na(data18$Gene), ]
+# xxx <- read_excel("30390659-cis.xlsx")
+# colnames(xxx) <- xxx[1,]
+# xxx <- xxx[-1,]
+# data18$Genesymbol <- xxx$Genename
+# xxx <- NULL
+# write.table(data18[,c(2,17)], file = "/home/renshida/eqtm/data/trans_g_id/30390659-cis.txt", sep = "\t", row.names = FALSE)
 write.table(data18, file = "/home/renshida/eqtm/data/human/30390659-cis.txt", sep = "\t", row.names = FALSE)
 has_na <- any(is.na(data18$Genename))
 na_count <- sum(is.na(data18$Genename))
@@ -1174,18 +1164,18 @@ write.table(data21, file = "/home/renshida/eqtm/data/human/35710981-cis.txt", se
 
 
 ####
-data22 <- read_excel("33752734-cis-trans.xlsx",sheet = "Table S2")
-colnames(data22) <- data22[1,]
-data22 <- data22[-1,]
-data22 <- NULL
+# data22 <- read_excel("33752734-cis-trans.xlsx",sheet = "Table S2")
+# colnames(data22) <- data22[1,]
+# data22 <- data22[-1,]
+# data22 <- NULL
 
 
 
 ############
-data23 <- read_csv("33989148-cis.txt")
-str(data23)
-head(data23)
-data23 <- data23 %>%
+# data23 <- read_csv("33989148-cis.txt")
+# str(data23)
+# head(data23)
+# data23 <- data23 %>%
   separate(`CpG Gene Statistic P-Value FDR Beta`, into = c("CpG", "Gene", "Statistic", "P.Value", "FDR", "Beta"), sep = " ",  convert = TRUE)
 data23 <- data23[,c(1,2,6,4,5)]
 colnames(data23)[1] <- "CpG"
@@ -1268,8 +1258,8 @@ write.table(data25, file = "/home/renshida/eqtm/data/human/35232286-DMR.txt", se
 
 
 ########
-data26 <- read_csv("36803404.txt")
-data26 <- separate(data26, col = 1, into = c("CpG", "Gene", "CpG_Chr", "Position_kb", "Transcript_Gene", "Coefficient", "p_value"), sep = "\t", convert = TRUE)
+data26 <- read.table("36803404.txt", header = TRUE, sep = "\t")
+#data26 <- separate(data26, col = 1, into = c("CpG", "Gene", "CpG_Chr", "Position_kb", "Transcript_Gene", "Coefficient", "p_value"), sep = "\t", convert = TRUE)
 data26 <- data26[,c(2,5,6,7)]
 colnames(data26)[1] <- "CpG"
 colnames(data26)[2] <- "Gene"
