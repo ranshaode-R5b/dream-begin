@@ -297,6 +297,7 @@ pdf("DiffBind_PlotsAP.pdf")
 dba.plotPCA(tamoxifenAP,  attributes=DBA_FACTOR, label=DBA_ID)
 plot(tamoxifenAP)
 dev.off()
+###差异分析
 tamoxifenAP<- dba.contrast(tamoxifenAP, categories=DBA_CONDITION,minMembers = 2)
 tamoxifenAP <- dba.analyze(tamoxifenAP)
 compAP.deseq <- dba.report(tamoxifenAP, method=DBA_DESEQ2, contrast = 1, th=1)
