@@ -73,18 +73,18 @@ ddsMat_rlog <- rlog(ddsMat, blind = FALSE)
 # 收集40个显著基因，制作矩阵
 mat <- assay(ddsMat_rlog[row.names(results_sig)])[1:40, ]
 
-# 选择您要用来注释列的列变量。
+# 选择要用来注释列的列变量
 annotation_col <- data.frame(
   Group = factor(colData(ddsMat_rlog)$treatment), 
   row.names = rownames(colData(ddsMat_rlog))
 )
 z <- factor(colData(ddsMat_rlog)$treatment) 
-# 指定要用来注释列的颜色。
+# 指定要用来注释列的颜色
 ann_colors = list(
   Group = c(TMAO = "lightblue", control = "darkorange")
 )
 
-# 使用 pheatmap 功能制作热图。
+# 使用 pheatmap 功能制作热图
 pheatmap(mat = mat, 
          color = colorRampPalette(brewer.pal(9, "YlOrBr"))(255), 
          scale = "row",
@@ -129,8 +129,6 @@ vol +
 
 #MA
 library(ggplot2)
-
-# 假设您的数据框名为results
 # 将padj值转换为-log10以便于绘图
 results$neg_log10_padj <- -log10(results$padj)
 results$logbasemean <- log10(results$baseMean)
