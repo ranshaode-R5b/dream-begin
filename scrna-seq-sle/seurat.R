@@ -90,7 +90,7 @@ DimHeatmap(seurat_object, dims = 1:2, cells = 500, balanced = TRUE)
 
 
 #Jackstraw 置换检验算法；重复取样（原数据的 1%），重跑PCA,鉴定p-value较小的PC；计算‘null distribution’(即零假设成立时)时的基因 scores; 
-seurat_object <- JackStraw(seurat_object, num.replicate = 100,dims = 20)  ##耗时3min
+seurat_object <- JackStraw(seurat_object, num.replicate = 100,dims = 20)  ##耗时3min 使用JackStraw函数计算每个PC的P值的分布
 seurat_object <- ScoreJackStraw(seurat_object, dims = 1:20) #dims必须小于等于上一步
 JackStrawPlot(seurat_object, dims = 1:15) #dims必须在上一步的范围内
 #肘部图，基于每个主成分对方差解释率的排名； 
