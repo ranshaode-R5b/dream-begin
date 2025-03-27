@@ -17,11 +17,13 @@ Read10X:barcodes.tsv, features.tsv, matrix.mtx
 	除掉低质量的数据，包括破损或死亡的细胞、没捕获到细胞的empty droplet和捕获到2个以上细胞的doublets
 	一般低质量的细胞或者empty droplet通常含有很少的基因，而doublets容易测到更多的基因。另一方面，低质量或者死亡细胞会测到更多的线粒体基因表达的RNA
 3.数据标准化
-	NormalizeData,表达矩阵需要经过标准化
+	NormalizeData,表达矩阵需要经过标准化。
+	LogNormalize的做法是，每个细胞，每个基因的count除以该细胞的总counts，乘以scale.factor(默认是 10,000，就好像所有单细胞总共有10kUMI)，并对获得的值进行log1p 
+        转换，进行自然对数转换。归一化的数据存储在“RNA" assay的 seurat obj[['RNA']]@data中
 4..查找高变基因
-	一些基因在细胞中表达的浮动比较大，这些往往是我们后续分群的时候需要关注的
+	FindVariableFeatures，一些基因在细胞中表达的浮动比较大，这些往往是我们后续分群的时候需要关注的
 5.基因归一化
-	对所有的基因scale...去除细胞周期影响    #非必须
+	对所有的基因scale.data去除细胞周期影响，一般只对这些高变异的基因（即选定的 2000 个基因）进行操作
 XXX.如多批次数据，则需去除批次效应，harmony、cca
 	harmony：低维空间的坐标值，Harmony导入PCA的降维数据后，会采用soft k-means clustering算法将细胞聚类
 	cca：降维后，考虑空间距离的相关性，寻找不同数据集的“锚点”
