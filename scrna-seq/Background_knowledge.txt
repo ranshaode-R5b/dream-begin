@@ -13,6 +13,7 @@ Barcode用于标记不同的细胞，通常在单细胞RNA测序中，每个细�
 Read10X:barcodes.tsv, features.tsv, matrix.mtx
 	barcodes.tsv就是 cell id，features.tsv就是 gene id，matrix.mtx就是计数 counts 矩阵
 1.读入数据创建Seurat对象
+	初步过滤：每个细胞中至少检测到200个基因，每个基因至少在3个细胞中表达
 2.数据质控
 	除掉低质量的数据，包括破损或死亡的细胞、没捕获到细胞的empty droplet和捕获到2个以上细胞的doublets
 	一般低质量的细胞或者empty droplet通常含有很少的基因，而doublets容易测到更多的基因。另一方面，低质量或者死亡细胞会测到更多的线粒体基因表达的RNA
