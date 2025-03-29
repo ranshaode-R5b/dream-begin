@@ -44,7 +44,7 @@ nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39
 ##建立索引
 bowtie2-build Zm-B73-REFERENCE-NAM-5.0.fa Zm-B73-5.0 --threads 4
 mkdir -p 4.align 5.filter 6.dedup
-#安装qualimap  http://qualimap.conesalab.org/
+#安装qualimap  http://qualimap.conesalab.org/  对测序数据的BAM文件进行覆盖度、重复度、插入片段长度等进行统计和可视化
 chmod +x qualimap
 java_options="-Xms32m -Xmx$JAVA_MEM_SIZE -XX:MaxPermSize=1024m"  替换为
 java_options="-Xms32m -Xmx$JAVA_MEM_SIZE"
