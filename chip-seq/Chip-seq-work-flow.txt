@@ -131,11 +131,11 @@ input_bam="4.align/${fq_f}.bam"
 java -jar /home/renshida/renshida/biosoftools/GenomeAnalysisTK/gatk-4.4.0.0/gatk-package-4.4.0.0-local.jar MarkDuplicates \
 I=$input_bam \
 O=6.dedup/${fq_f}_dedup.bam \
-M=6.dedup/${fq_f}_dedup_metrics.txt \
-REMOVE_DUPLICATES=true \
+M=6.dedup/${fq_f}_dedup_metrics.txt \ #输出的重复比对统计文件
+REMOVE_DUPLICATES=true \ #移除重复比对
 READ_NAME_REGEX=null
 /home/renshida/renshida/biosoftools/qualimap2/qualimap bamqc --java-mem-size=8G -bam 6.dedup/${fq_f}_dedup.bam -outdir 6.dedup/
-samtools flagstat 6.dedup/{fq_f}_dedup.bam > 6.dedup/{fq_f}_dedup_flagstat.txt
+samtools flagstat 6.dedup/{fq_f}_dedup.bam > 6.dedup/{fq_f}_dedup_flagstat.txt  #统计去重复后的 BAM 文件的比对情况
 samtools index 6.dedup/${fq_f}_dedup.bam
 done
 
