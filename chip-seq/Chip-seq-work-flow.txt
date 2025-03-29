@@ -20,7 +20,7 @@ ILLUMINACLIP：去除接头（ILLUMINACLIP:TruSeq3-PE.fa:2:30:10）
 LEADING: 从 reads 的开头切除质量值低于阈值的碱基（低于质量 3）（LEADING:3）
 TRAILING: 从 reads 的末尾开始切除质量值低于阈值的碱基（TRAILING:3）
 SLIDINGWINDOW: 从 reads 的 5' 端开始，进行滑窗质量过滤，切掉碱基质量平均值低于阈值的滑窗，使用宽度为 4 碱基的滑动窗口扫描读取，当每碱基的平均质量低于 15 时进行剪切（SLIDINGWINDOW:4:15）
-MINLEN: 如果经过剪切后 reads 的长度低于阈值则丢弃这条 reads，即上面的计算方法：（150-9）×40%≈56 （本次没有使用）或者测序片段的长度：MINLEN 应该与测序片段的长度相关。例如，如果片段的原始长度是 150 bp，那么设置 MINLEN 为一个较低值（例如 50-100 bp）可以帮助去除过短的片段，但保留足够长的高质量读段。下游分析的需求：短的片段可能在比对时不准确，或影响后续的定量分析。因此，如果下游分析要求较长的片段，如比对或组装基因组时，建议选择相对较高的 MINLEN。例如，如果某些分析工具要求最小片段长度为 36 bp 或 50 bp，您应该确保 MINLEN 设置满足该要求。
+MINLEN: 如果经过剪切后 reads 的长度低于阈值则丢弃这条 reads，即上面的计算方法：（150-9）×40%≈56 （本次没有使用）或者测序片段的长度：MINLEN 应该与测序片段的长度相关。例如，如果片段的原始长度是 150 bp，那么设置 MINLEN 为一个较低值（例如 50-100 bp）可以帮助去除过短的片段，但保留足够长的高质量读段。下游分析的需求：短的片段可能在比对时不准确，或影响后续的定量分析。因此，如果下游分析要求较长的片段，如比对或组装基因组时，建议选择相对较高的 MINLEN。例如，如果某些分析工具要求最小片段长度为 36 bp 或 50 bp，应该确保 MINLEN 设置满足该要求。
 
 #2.去接头，双端输入两个，输出四个（包含两个未配对的，但是结果只要配对上的）
 nohup java -jar /home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 HDT102_H4_input_R2.fastq.gz HDT102_H4_input_R1.fastq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R2_paired.fq.gz    ./Trimmomatic_res/output_HDT102_H4_input_R2_unpaired.fq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R1_paired.fq.gz   ./Trimmomatic_res/output_HDT102_H4_input_R1_unpaired.fq.gz HEADCROP:9 ILLUMINACLIP:/home/renshida/renshida/biosoftools/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:56 &
