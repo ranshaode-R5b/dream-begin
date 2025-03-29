@@ -1,7 +1,6 @@
 # ChIp-Seq（染色质免疫共沉淀测序）数据分析--学习 
 
 ```shell
-mkdir -p 1.qc 2.multiqc 
 1.FastqQC
 nohup fastqc *.gz -o 1.qc &
 #安装multiqc
