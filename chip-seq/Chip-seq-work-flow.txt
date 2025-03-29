@@ -292,6 +292,7 @@ AP
 #读入文件一旦读入了peaksets，合并函数就找到所有重叠的peaks，并导出一致性的peaksets。
 tamoxifenAP <- dba(sampleSheet="tamoxifenAP.csv")
 #亲和结合矩阵，计算每个peaks/regions的count信息。先对一致性的peaks数据集进行标准化，然后根据他们的峰值（point of greatest read overlap）再次中心化并修剪一些peaks，最终得到更加标准的peak间隔。
+#结果中同时计算了FRiP
 tamoxifenAP<- dba.count(tamoxifenAP)
 pdf("DiffBind_PlotsAP.pdf")
 dba.plotPCA(tamoxifenAP,  attributes=DBA_FACTOR, label=DBA_ID)
@@ -300,7 +301,7 @@ dev.off()
 ###差异分析
 tamoxifenAP<- dba.contrast(tamoxifenAP, categories=DBA_CONDITION,minMembers = 2)
 tamoxifenAP <- dba.analyze(tamoxifenAP)
-compAP.deseq <- dba.report(tamoxifenAP, method=DBA_DESEQ2, contrast = 1, th=1)
+compAP.deseq <- dba.report(tamoxifenAP, method=DBA_DESEQ2, contrast = 1, th=1)#结果文件包含所有位点的基因组坐标，以及差异富集的统计数据包括fold change、p值和FDR。其中Conc的表示read的平均浓度，即对peak 的read counts进行log2标准化
 out <- as.data.frame(compAP.deseq)
 write.table(out, file="./deseq2AP.txt", sep="\t", quote=F, col.names = NA)
 deseq2AP.bed <- out[ which(out$FDR < 0.05), 
