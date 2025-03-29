@@ -185,14 +185,14 @@ nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g 2
 
 macs3 callpeak -t ChIP.bam -c Control.bam --broad -g hs --broad-cutoff 0.1 -n test
 
-nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_2_H4 &
-nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_1_H4 &
-nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_2_AP &
-nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n HDT102_1_AP &
-nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_2_H4 &
-nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_1_H4 &
-nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_2_AP &
-nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g hs --broad-cutoff 0.1 -n B73_1_AP &
+nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n HDT102_2_H4 &
+nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n HDT102_1_H4 &
+nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n HDT102_2_AP &
+nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n HDT102_1_AP &
+nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n B73_2_H4 &
+nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n B73_1_H4 &
+nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n B73_2_AP &
+nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam --broad -g 2178268108 --broad-cutoff 0.1 -n B73_1_AP &
 
 #.bedgraph to bw（重新生成bw,双端测序归一化后）
 
