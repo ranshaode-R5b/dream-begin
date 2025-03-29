@@ -150,15 +150,36 @@ for i in 6.dedup/*.bam;do f=$(echo $i | sed 's/6\.dedup\/\(.*\)\_dedup\.bam/\1/'
 #寻找ChIP-seq的转录因子（TF）的命令：（生成的文件是narrowPeak）
 
 macs3 callpeak -t ChIP.bam(处理) -c Control.bam（对照） -f BAM -g hs -n test -B -q 0.01 
+# 计算有效基因大小
+#coding=utf-8
+#import sys
+#aList=[]
+#fa_file = sys.argv[1]
+#with open(fa_file,'r') as f:
+#    for line in f:
+#        line = line.strip()
+#        line = line.upper()
+#        if not line.startswith(">"):
+#            baseA = line.count("A")
+#            baseT = line.count("T")
+#            baseC = line.count("C")
+#            baseG = line.count("G")
+#            aList.extend([baseA, baseT, baseC, baseG])
+#            # print(aList)
+#print("effective_genome_size =", sum(aList))
 
-nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_2_H4 -B -p 0.01 &
-nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_1_H4 -B -p 0.01 &
-nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g hs -n HDT102_2_AP -B -p 0.01 &
-nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g hs -n HDT102_1_AP -B -p 0.01 &
-nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g hs -n B73_2_H4 -B -p 0.01 &
-nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g hs -n B73_1_H4 -B -p 0.01 &
-nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g hs -n B73_2_AP -B -p 0.01 &
-nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g hs -n B73_1_AP -B -p 0.01 &
+#python youxiaojiyinzudaxiao.py Zm-B73-REFERENCE-NAM-5.0.fa
+# 运行结果
+#effective_genome_size = 2178268108
+
+nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g 2178268108 -n HDT102_2_H4 -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g 2178268108 -n HDT102_1_H4 -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_2_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g 2178268108 -n HDT102_2_AP -B -p 0.01 &
+nohup macs3 callpeak -t HDT102_1_AP_dedup.bam -c HDT102_AP_input_dedup.bam -f BAM -g 2178268108 -n HDT102_1_AP -B -p 0.01 &
+nohup macs3 callpeak -t B73_2_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g 2178268108 -n B73_2_H4 -B -p 0.01 &
+nohup macs3 callpeak -t B73_1_H4_dedup.bam -c B73_H4_input_dedup.bam -f BAM -g 2178268108 -n B73_1_H4 -B -p 0.01 &
+nohup macs3 callpeak -t B73_2_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g 2178268108 -n B73_2_AP -B -p 0.01 &
+nohup macs3 callpeak -t B73_1_AP_dedup.bam -c B73_AP_input_dedup.bam -f BAM -g 2178268108 -n B73_1_AP -B -p 0.01 &
 
 #寻找ChIP-seq的组蛋白（Histone ）Mark的命令：（生成的文件是broadPeak）
 
