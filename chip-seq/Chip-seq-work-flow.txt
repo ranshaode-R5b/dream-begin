@@ -139,7 +139,7 @@ samtools flagstat 6.dedup/{fq_f}_dedup.bam > 6.dedup/{fq_f}_dedup_flagstat.txt  
 samtools index 6.dedup/${fq_f}_dedup.bam
 done
 
-#5.生成bw文件
+#5.生成bw文件 #bin size
 
 mkdir -p 7.bamCover
 
@@ -149,7 +149,7 @@ for i in 6.dedup/*.bam;do f=$(echo $i | sed 's/6\.dedup\/\(.*\)\_dedup\.bam/\1/'
 
 #寻找ChIP-seq的转录因子（TF）的命令：（生成的文件是narrowPeak）
 
-macs3 callpeak -t ChIP.bam(处理) -c Control.bam（对照） -f BAM -g hs -n test -B -q 0.01
+macs3 callpeak -t ChIP.bam(处理) -c Control.bam（对照） -f BAM -g hs -n test -B -q 0.01 
 
 nohup macs3 callpeak -t HDT102_2_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_2_H4 -B -p 0.01 &
 nohup macs3 callpeak -t HDT102_1_H4_dedup.bam -c HDT102_H4_input_dedup.bam -f BAM -g hs -n HDT102_1_H4 -B -p 0.01 &
